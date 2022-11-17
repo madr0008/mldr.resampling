@@ -62,6 +62,6 @@ LP_RUS <- function(D, P) {
     i <- i - 1
   }
 
-  return(mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name))
+  mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
 
 }
