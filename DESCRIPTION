@@ -1,9 +1,12 @@
 Package: mldr.resampling
 Title: Resampling algorithms for Multilabel Datasets
 Version: 0.0.0.9000
-Authors@R: 
-    person("Miguel Ángel", "Dávila", , "madr0008@red.ujaen.es", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+    person("Miguel Ángel", "Dávila", , "madr0008@red.ujaen.es", role = cre"),
+    person("Francisco", "Charte", email = "francisco@fcharte.com", role = "aut", comment = c(ORCID = "0000-0002-3083-8942")),
+    person("María José", "Del Jesús", email = "mjjesus@ujaen.es", role = "aut", comment = c(ORCID = "0000-0002-7891-3059"))
+    )
+Developpers:
 Description: Collection of the state of the art multilabel resampling algorithms, along with some new ones based on the new deep generative models used with images. The objective of these algorithms is to achieve balance in multilabel datasets.
 License: MIT + file LICENSE
 Encoding: UTF-8
