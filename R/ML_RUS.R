@@ -1,13 +1,18 @@
-#' Title
+#' @title Randomly deletes instances with majoritary labels
 #'
-#' @param D Original multilabel dataset
-#' @param P Percentage in which the original dataset is reduced
+#' @description This function implements the ML-RUS algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
+#' whose aim is to identify instances with majoritary labels, and randomly delete them from the original dataset.
 #'
-#' @return Processed multilabel dataset, more balanced
-#' @export
+#' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163:3–16, 2015. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2014.08.091
 #'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param P Percentage in which the original dataset is increased
+#'
+#' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
+#' library(mldr)
 #' ML_RUS(bibtex, 25)
+#' @export
 ML_RUS <- function(D, P) {
 
   mldr_from_dataframe(D$dataset[-sample(c(1:D$measures$num.instances)[-as.numeric(rownames(D$dataset[rowSums(D$dataset[D$labels[D$labels$IRLbl > D$measures$meanIR,]$index]) > 0,]))],(D$measures$num.instances  / 100) * P,replace=FALSE),], D$labels$index, D$attributes, D$name)

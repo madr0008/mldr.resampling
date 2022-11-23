@@ -2,21 +2,26 @@
 % Please edit documentation in R/ML_RUS.R
 \name{ML_RUS}
 \alias{ML_RUS}
-\title{Title}
+\title{Randomly deletes instances with majoritary labels}
+\source{
+Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163:3–16, 2015. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2014.08.091
+}
 \usage{
 ML_RUS(D, P)
 }
 \arguments{
-\item{D}{Original multilabel dataset}
+\item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
-\item{P}{Percentage in which the original dataset is reduced}
+\item{P}{Percentage in which the original dataset is increased}
 }
 \value{
-Processed multilabel dataset, more balanced
+An mldr object containing the preprocessed multilabel dataset
 }
 \description{
-Title
+This function implements the ML-RUS algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
+whose aim is to identify instances with majoritary labels, and randomly delete them from the original dataset.
 }
 \examples{
+library(mldr)
 ML_RUS(bibtex, 25)
 }
