@@ -1,0 +1,73 @@
+#' @title Randomly clones instances with minoritary labelsets
+#'
+#' @description This function implements the LP-ROS algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
+#' whose aim is to identify instances with minoritary labels, and randomly clone them.
+#'
+#' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163:3–16, 2015. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2014.08.091
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param P Percentage in which the original dataset is increased
+#'
+#' @return An mldr object containing the preprocessed multilabel dataset
+#' @examples
+#' library(mldr)
+#' LP_ROS(bibtex, 25)
+#' @export
+LP_ROS <- function(D, P) {
+
+  #Calculate the number of samples to generated in order to increase in percentage P
+  samplesToIncrease <- (D$measures$num.instances  / 100) * P
+
+  #Create the bag of labelsets, with the samples that have each labelset
+  labelSetBag <- rep(list(c()), D$measures$num.labelsets)
+  names(labelSetBag) <- names(D$labelset)
+
+  #Obtain the class label of each instance
+  classLabels <- mldr_transform(D, type="LP")$classLabel
+
+  #Include indexes of the instances with a specific labelset in its labelset bag
+  for (i in 1:D$measures$num.instances) {
+    labelSetBag[[classLabels[i]]][length(labelSetBag[[classLabels[i]]]) + 1] <- i
+  }
+
+  #Calculate the mean number of samples per labelset
+  meanSize <- D$measures$num.instances/D$measures$num.labelsets
+
+  #Obtain instances with minoritary labelsets
+  minBag <- c()
+  for (i in 1:length(labelSetBag)) {
+    if (length(labelSetBag[[i]]) < meanSize) {
+      minBag[length(minBag) + 1] <- i
+    } else {
+      break
+    }
+  }
+
+  #Calculate number of instances to increase, and add them (process minBag from largest to smallest)
+  meanInc <- round(samplesToIncrease/length(minBag)) #Round o ceiling?
+  remainder <- rep(0, length(minBag))
+  aux <- c()
+  for (i in length(minBag):1) {
+    rBag <- min(length(meanSize - labelSetBag[[minBag[i]]]), meanInc)
+    remainder[i] <- meanInc - rBag
+    #Clone instances
+    labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=FALSE)])
+  }
+
+  #Distribute among bags
+  remainder[1] <- round(remainder[1] + samplesToIncrease - meanInc*length(minBag))
+  i <- 1
+  while ((remainder[i] != 0) && (i <= length(remainder))) {
+    x <- sample(aux, size = round(remainder[i]), replace=FALSE)
+    bags <- table(x)
+    for (j in 1:length(bags)) {
+      labelSetBag[[minBag[as.numeric(names(bags)[j])]]] <- c(labelSetBag[[minBag[as.numeric(names(bags)[j])]]], labelSetBag[[minBag[as.numeric(names(bags)[j])]]][sample.int(length(labelSetBag[[minBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)])
+    }
+    aux <- vecsets::vsetdiff(aux, x)
+    aux <- aux[(length(labelSetBag[[majBag[i]]]) + 1):length(aux)]
+    i <- i + 1
+  }
+
+  mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+
+}
