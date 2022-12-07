@@ -48,10 +48,11 @@ LP_ROS <- function(D, P) {
   remainder <- rep(0, length(minBag))
   aux <- c()
   for (i in length(minBag):1) {
-    rBag <- min(length(meanSize - labelSetBag[[minBag[i]]]), meanInc)
+    rBag <- min(meanSize - length(labelSetBag[[minBag[i]]]), meanInc)
     remainder[i] <- meanInc - rBag
     #Clone instances
     labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=FALSE)])
+    aux <- c(aux, rep(i, length(labelSetBag[[minBag[i]]])))
   }
 
   #Distribute among bags
@@ -64,7 +65,7 @@ LP_ROS <- function(D, P) {
       labelSetBag[[minBag[as.numeric(names(bags)[j])]]] <- c(labelSetBag[[minBag[as.numeric(names(bags)[j])]]], labelSetBag[[minBag[as.numeric(names(bags)[j])]]][sample.int(length(labelSetBag[[minBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)])
     }
     aux <- vecsets::vsetdiff(aux, x)
-    aux <- aux[(length(labelSetBag[[majBag[i]]]) + 1):length(aux)]
+    aux <- aux[(length(labelSetBag[[minBag[i]]]) + 1):length(aux)]
     i <- i + 1
   }
 
