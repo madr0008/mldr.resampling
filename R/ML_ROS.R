@@ -22,11 +22,7 @@ ML_ROS <- function(D, P) {
   minLabels <- D$labels[D$labels$IRLbl > D$measures$meanIR,]$index
 
   #Obtain indexes of each minority label
-  minBag <- rep(list(c()),length(minLabels))
-  #names(minBag) <- minLabels
-  for (i in 1:length(minBag)) {
-    minBag[[i]] <- as.numeric(rownames(D$dataset[D$dataset[minLabels[i]]==1,]))
-  }
+  minBag <- lapply(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))
 
   #Instance cloning loop
   clonedSamples <- c()
@@ -35,23 +31,16 @@ ML_ROS <- function(D, P) {
   maxCount <- max(D$labels$count)
   while ((samplesToClone > 0) && all(canClone)) {
 
-    for (i in 1:length(minBag)) {
-
+    samplesToClone <- samplesToClone - sum(canClone)
+    clonedSamples <- c(clonedSamples, unlist(lapply(c(1:length(minBag)), function(i) {
       if (canClone[i]) {
-
-        clonedSamples[length(clonedSamples) + 1] <- sample(minBag[[i]],1,replace=FALSE)
-        samplesToClone <- samplesToClone - 1
-        newIRLbl <- maxCount/D$labels$count[D$labels$index == minLabels[i]]
-        if (newIRLbl <= D$measures$meanIR) {
-          canClone[i] <- FALSE
-        }
+        return(sample(minBag[[i]],1,replace=FALSE))
+        canClone[i] <- !(maxCount/D$labels$count[D$labels$index == minLabels[i]] <= D$measures$meanIR)
       }
-
-    }
+    })))
 
   }
 
   mldr_from_dataframe(D$dataset[c(1:D$measures$num.instances,clonedSamples),], D$labels$index, D$attributes, D$name)
-
 
 }
