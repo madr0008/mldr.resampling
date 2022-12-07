@@ -49,13 +49,13 @@ newSample <- function(sample, refNeigh, neighbors, D) {
 
   c(
     lapply(D$attributesIndexes, function(i) { #Attributes
-                                  ifelse(is.numeric(D$dataset[1,i]),
-                                         D$dataset[sample,i] + D$dataset[refNeigh,i] - D$dataset[sample,i]*runif(1, 0, 1), #Numeric attributes
-                                         tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
-                                }),
+      ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
+             D$dataset[sample,i] + D$dataset[refNeigh,i] - D$dataset[sample,i]*runif(1, 0, 1), #Numeric attributes
+             tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
+    }),
     sapply(lapply(D$dataset[c(sample, neighbors),D$labels$index], sum), function(x) { #Labels
-                                                                          ifelse(x > ((length(neighbors)+1)/2), 1, 0)
-                                                                        }),
+      ifelse(x > ((length(neighbors)+1)/2), 1, 0)
+    }),
     rep(NA, length(D$dataset) - D$measures$num.attributes) #Other measures like labelcount, SCUMBLE
   )
 
