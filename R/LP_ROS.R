@@ -8,7 +8,7 @@
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param P Percentage in which the original dataset is increased
 #'
-#' @return An mldr object containing the preprocessed multilabel dataset
+#' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
 #' library(mldr)
 #' LP_ROS(bibtex, 25)

@@ -8,7 +8,7 @@
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param P Percentage in which the original dataset is increased
 #'
-#' @return An mldr object containing the preprocessed multilabel dataset
+#' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
 #' library(mldr)
 #' ML_ROS(bibtex, 25)
@@ -21,7 +21,7 @@ ML_ROS <- function(D, P) {
   #Obtain indexes of minoritary labels
   minLabels <- D$labels[D$labels$IRLbl > D$measures$meanIR,]$index
 
-  #Obtain indexes of each minority label
+  #Obtain indexes of instances with each minority label
   minBag <- lapply(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))
 
   #Instance cloning loop
