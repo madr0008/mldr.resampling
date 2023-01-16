@@ -15,7 +15,7 @@ ML_ROS(D, P)
 \item{P}{Percentage in which the original dataset is increased}
 }
 \value{
-An mldr object containing the preprocessed multilabel dataset
+A mld object containing the preprocessed multilabel dataset
 }
 \description{
 This function implements the ML-ROS algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,

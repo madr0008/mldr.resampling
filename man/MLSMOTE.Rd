@@ -2,7 +2,7 @@
 % Please edit documentation in R/MLSMOTE.R
 \name{MLSMOTE}
 \alias{MLSMOTE}
-\title{Synthetic oversampling of multilabel instances}
+\title{Synthetic oversampling of multilabel instances (MLSMOTE)}
 \source{
 Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. MLSMOTE: Approaching imbalanced multilabel learning through synthetic instance generation. Knowledge-Based Systems, 39:385–397, 2015. ISSN 0950-7051. doi:https://doi.org/10.1016/j.knosys.2015.07.019
 }
@@ -15,7 +15,7 @@ MLSMOTE(D, k)
 \item{k}{Number of neighbors to be considered when creatinga synthetic instance}
 }
 \value{
-An mldr object containing the preprocessed multilabel dataset
+A mld object containing the preprocessed multilabel dataset
 }
 \description{
 This function implements the MLSMOTE algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
