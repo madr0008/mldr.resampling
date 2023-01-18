@@ -22,6 +22,8 @@ This function implements the LP-RUS algorithm. It is a preprocessing algorithm f
 whose aim is to identify instances with majoritary labelsets, and randomly delete them from the original dataset.
 }
 \examples{
+\dontrun{
 library(mldr)
 LP_RUS(bibtex, 25)
+}
 }

@@ -7,14 +7,17 @@
 #'
 #' @return A synthetic sample derived from the one passed as a parameter and its neighbors
 #' @examples
+#' \dontrun{
+#' library(mldr)
 #' newSample(25,28,c(15,28,62),bibtex)
+#' }
 newSample <- function(sample, refNeigh, neighbors, D) {
 
   c(
     lapply(D$attributesIndexes, function(i) { #Attributes
       ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
-             D$dataset[sample,i] + D$dataset[refNeigh,i] - D$dataset[sample,i]*runif(1, 0, 1), #Numeric attributes
-             tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
+             D$dataset[sample,i] + D$dataset[refNeigh,i] - D$dataset[sample,i]*stats::runif(1, 0, 1), #Numeric attributes
+             utils::tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
     }),
     sapply(lapply(D$dataset[c(sample, neighbors),D$labels$index], sum), function(x) { #Labels
       ifelse(x > ((length(neighbors)+1)/2), 1, 0)
@@ -38,8 +41,10 @@ newSample <- function(sample, refNeigh, neighbors, D) {
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' MLSMOTE(bibtex, 3)
+#' }
 #' @export
 MLSMOTE <- function(D, k) {
 
@@ -52,6 +57,6 @@ MLSMOTE <- function(D, k) {
                                                                                                   })
                                                                                   }), recursive = FALSE)
 
-  mldr_from_dataframe(rbind(D$dataset, lapply(setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset, lapply(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
 
 }

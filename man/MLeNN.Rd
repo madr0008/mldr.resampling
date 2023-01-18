@@ -12,7 +12,9 @@ MLeNN(D, TH = 0.5, NN = 3)
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
-\item{k}{Number of neighbors to be considered when creatinga synthetic instance}
+\item{TH}{threshold for the Hamming Distance in order to consider an instance different to another one. Defaults to 0.5.}
+
+\item{NN}{number of nearest neighbours to check for each instance. Defaults to 3.}
 }
 \value{
 An mldr object containing the preprocessed multilabel dataset
@@ -22,6 +24,8 @@ This function implements the MLeNN algorithm. It is a preprocessing algorithm fo
 whose aim is to identify instances with minoritary labels, and remove its neihgbors which are too different to them, in terms of active labels.
 }
 \examples{
+\dontrun{
 library(mldr)
 MLeNN(bibtex, 0.5, 3)
+}
 }

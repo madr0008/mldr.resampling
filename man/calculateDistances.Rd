@@ -22,5 +22,8 @@ A list with the distance to the rest of samples
 Auxiliary function used by to calculate the distances between an instance and the ones with a specific active label
 }
 \examples{
+\dontrun{
+library(mldr)
 calculateDistances(25,c(75,65,89,23),300,bibtex)
+}
 }

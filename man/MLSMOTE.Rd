@@ -22,6 +22,8 @@ This function implements the MLSMOTE algorithm. It is a preprocessing algorithm 
 whose aim is to identify instances with minoritary labels, and generate synthetic instances based on their neighbor instances.
 }
 \examples{
+\dontrun{
 library(mldr)
 MLSMOTE(bibtex, 3)
+}
 }

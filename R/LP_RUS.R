@@ -10,8 +10,10 @@
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' LP_RUS(bibtex, 25)
+#' }
 #' @export
 LP_RUS <- function(D, P) {
 
@@ -23,7 +25,7 @@ LP_RUS <- function(D, P) {
   names(labelSetBag) <- names(D$labelset)
 
   #Obtain the class label of each instance
-  classLabels <- mldr_transform(D, type="LP")$classLabel
+  classLabels <- mldr::mldr_transform(D, type="LP")$classLabel
 
   #Include indexes of the instances with a specific labelset in its labelset bag
   for (i in 1:D$measures$num.instances) {
@@ -67,6 +69,6 @@ LP_RUS <- function(D, P) {
     i <- i - 1
   }
 
-  mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
 
 }

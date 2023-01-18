@@ -9,7 +9,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' library(mldr)
 #' calculateDistances(25,c(75,65,89,23),300,bibtex)
+#' }
 calculateDistances <- function(sample, rest, label, D) {
 
   sapply(rest, function(y) {
@@ -25,7 +28,7 @@ calculateDistances <- function(sample, rest, label, D) {
                    table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
                    table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
                    sum(
-                     abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", setNames(c(table1, 0), c("0","1")), setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", setNames(c(table2, 0), c("0","1")), setNames(c(0, table2), c("0","1"))), table2))
+                     abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
                    )
                  })
                )

@@ -21,6 +21,8 @@ whose aim is to decouple frequent and rare classes appearing in the same instanc
 and edit the labels present in them.
 }
 \examples{
+\dontrun{
 library(mldr)
 remedial(birds)
+}
 }

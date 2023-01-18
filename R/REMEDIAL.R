@@ -6,8 +6,10 @@
 #' @param mld \code{mldr} object with the multilabel dataset to preprocess
 #' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' remedial(birds)
+#' }
 #' @export
 remedial <- function(mld) decoupleImbalancedLabels(mld, mld$measures$scumble)
 

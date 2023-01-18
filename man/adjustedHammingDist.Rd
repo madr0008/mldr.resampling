@@ -20,5 +20,8 @@ The Hamming Distance between the instances
 Auxiliary function used by MLeNN. Computes the Hamming Distance between two instances
 }
 \examples{
+\dontrun{
+library(mldr)
 adjustedHammingDist(1,2,bibtex)
+}
 }

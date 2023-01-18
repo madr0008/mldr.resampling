@@ -22,5 +22,8 @@ A synthetic sample derived from the one passed as a parameter and its neighbors
 Auxiliary function used by MLSMOTE. Creates a synthetic sample based on values of attributes and labels of its neighbors
 }
 \examples{
+\dontrun{
+library(mldr)
 newSample(25,28,c(15,28,62),bibtex)
+}
 }

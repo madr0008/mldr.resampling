@@ -10,11 +10,13 @@
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' ML_RUS(bibtex, 25)
+#' }
 #' @export
 ML_RUS <- function(D, P) {
 
-  mldr_from_dataframe(D$dataset[-sample(c(1:D$measures$num.instances)[-as.numeric(rownames(D$dataset[rowSums(D$dataset[D$labels[D$labels$IRLbl > D$measures$meanIR,]$index]) > 0,]))],(D$measures$num.instances  / 100) * P,replace=FALSE),], D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(D$dataset[-sample(c(1:D$measures$num.instances)[-as.numeric(rownames(D$dataset[rowSums(D$dataset[D$labels[D$labels$IRLbl > D$measures$meanIR,]$index]) > 0,]))],(D$measures$num.instances  / 100) * P,replace=FALSE),], D$labels$index, D$attributes, D$name)
 
 }

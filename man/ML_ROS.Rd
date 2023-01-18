@@ -22,6 +22,8 @@ This function implements the ML-ROS algorithm. It is a preprocessing algorithm f
 whose aim is to identify instances with minoritary labels, and randomly clone them.
 }
 \examples{
+\dontrun{
 library(mldr)
 ML_ROS(bibtex, 25)
+}
 }

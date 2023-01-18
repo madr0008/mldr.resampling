@@ -6,7 +6,10 @@
 #'
 #' @return The Hamming Distance between the instances
 #' @examples
+#' \dontrun{
+#' library(mldr)
 #' adjustedHammingDist(1,2,bibtex)
+#' }
 adjustedHammingDist <- function(x,y,D) {
   length(which(D$dataset[x,D$labels$index] != D$dataset[y,D$labels$index])) / (sum(D$dataset[x,D$labels$index]) + sum(D$dataset[y,D$labels$index]))
 }
@@ -21,12 +24,15 @@ adjustedHammingDist <- function(x,y,D) {
 #' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. MLeNN: A First Approach to Heuristic Multilabel Undersampling. Intelligent Data Engineering and Automated Learning -- IDEAL 2014. ISBN 978-3-319-10840-7.
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
-#' @param k Number of neighbors to be considered when creatinga synthetic instance
+#' @param TH threshold for the Hamming Distance in order to consider an instance different to another one. Defaults to 0.5.
+#' @param NN number of nearest neighbours to check for each instance. Defaults to 3.
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' MLeNN(bibtex, 0.5, 3)
+#' }
 #' @export
 MLeNN <- function(D, TH=0.5, NN=3) {#Obtain indexes of minoritary labels
   minLabels <- D$labels[D$labels$IRLbl > D$measures$meanIR,]$index
@@ -45,6 +51,6 @@ MLeNN <- function(D, TH=0.5, NN=3) {#Obtain indexes of minoritary labels
     ifelse(numDifferences >= NN/2,x) #Samples to delete
   }))
 
-  mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
 
 }

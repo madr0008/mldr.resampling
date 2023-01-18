@@ -10,8 +10,10 @@
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
+#' \dontrun{
 #' library(mldr)
 #' ML_ROS(bibtex, 25)
+#' }
 #' @export
 ML_ROS <- function(D, P) {
 
@@ -41,6 +43,6 @@ ML_ROS <- function(D, P) {
 
   }
 
-  mldr_from_dataframe(D$dataset[c(1:D$measures$num.instances,clonedSamples),], D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(D$dataset[c(1:D$measures$num.instances,clonedSamples),], D$labels$index, D$attributes, D$name)
 
 }
