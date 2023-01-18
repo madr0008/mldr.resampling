@@ -40,16 +40,14 @@ MLeNN <- function(D, TH=0.5, NN=3) {#Obtain indexes of minoritary labels
   #Obtain indexes of instances with each minority label
   minBag <- unique(unlist(lapply(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
 
-  toDelete <- unlist(lapply(minBag, function(x) {
-    activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-    print(activeLabels)
-    neighbors <- order(calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
-    print(neighbors)
-    numDifferences <- sum(unlist(lapply(neighbors, function(y) {
-      adjustedHammingDist(x,y,D) > TH
-    })))
-    ifelse(numDifferences >= NN/2,x) #Samples to delete
-  }))
+  toDelete <- unlist(pbapply::pblapply(minBag, function(x) {
+                                                  activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
+                                                  neighbors <- order(calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
+                                                  numDifferences <- sum(unlist(lapply(neighbors, function(y) {
+                                                    adjustedHammingDist(x,y,D) > TH
+                                                  })))
+                                                  ifelse(numDifferences >= NN/2,x) #Samples to delete
+                                                }))
 
   mldr::mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
 
