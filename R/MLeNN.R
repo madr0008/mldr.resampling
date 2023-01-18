@@ -34,11 +34,9 @@ adjustedHammingDist <- function(x,y,D) {
 #' MLeNN(bibtex, 0.5, 3)
 #' }
 #' @export
-MLeNN <- function(D, TH=0.5, NN=3) {#Obtain indexes of minoritary labels
-  minLabels <- D$labels[D$labels$IRLbl > D$measures$meanIR,]$index
+MLeNN <- function(D, TH=0.5, NN=3) {
 
-  #Obtain indexes of instances with each minority label
-  minBag <- unique(unlist(lapply(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
+  minBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
 
   toDelete <- unlist(pbapply::pblapply(minBag, function(x) {
                                                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
