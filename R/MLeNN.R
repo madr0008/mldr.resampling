@@ -19,7 +19,7 @@ adjustedHammingDist <- function(x,y,D) {
 #' @title Multilabel edited Nearest Neighbor (MLeNN)
 #'
 #' @description This function implements the MLeNN algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
-#' whose aim is to identify instances with minoritary labels, and remove its neihgbors which are too different to them, in terms of active labels.
+#' whose aim is to identify instances with majoritary labels, and remove its neihgbors which are too different to them, in terms of active labels.
 #'
 #' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. MLeNN: A First Approach to Heuristic Multilabel Undersampling. Intelligent Data Engineering and Automated Learning -- IDEAL 2014. ISBN 978-3-319-10840-7.
 #'
@@ -36,15 +36,15 @@ adjustedHammingDist <- function(x,y,D) {
 #' @export
 MLeNN <- function(D, TH=0.5, NN=3) {
 
-  minBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
+  majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
 
-  toDelete <- unlist(pbapply::pblapply(minBag, function(x) {
+  toDelete <- unlist(pbapply::pblapply(majBag, function(x) {
                                                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                                                  neighbors <- order(calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
+                                                  neighbors <- order(mldr.resampling::calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
                                                   numDifferences <- sum(unlist(lapply(neighbors, function(y) {
                                                     adjustedHammingDist(x,y,D) > TH
                                                   })))
-                                                  ifelse(numDifferences >= NN/2,x) #Samples to delete
+                                                  if (numDifferences >= NN/2) { x } #Samples to delete
                                                 }))
 
   mldr::mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
