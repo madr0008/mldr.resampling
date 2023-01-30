@@ -3,6 +3,7 @@
 export(LP_ROS)
 export(LP_RUS)
 export(MLSMOTE)
+export(MLTL)
 export(ML_ROS)
 export(ML_RUS)
 export(MLeNN)
