@@ -1,6 +1,6 @@
 #' Auxiliary function used by MLSMOTE. Creates a synthetic sample based on values of attributes and labels of its neighbors
 #'
-#' @param sample Sample we are using as "template"
+#' @param seedInstance Sample we are using as "template"
 #' @param refNeigh Reference neighbor
 #' @param neighbors Neighbors to take into account
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
@@ -11,15 +11,15 @@
 #' library(mldr)
 #' newSample(25,28,c(15,28,62),bibtex)
 #' }
-newSample <- function(sample, refNeigh, neighbors, D) {
+newSample <- function(seedInstance, refNeigh, neighbors, D) {
 
   c(
     lapply(D$attributesIndexes, function(i) { #Attributes
       ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
-             D$dataset[sample,i] + D$dataset[refNeigh,i] - D$dataset[sample,i]*stats::runif(1, 0, 1), #Numeric attributes
+             D$dataset[seedInstance,i] + (D$dataset[refNeigh,i] - D$dataset[seedInstance,i])*stats::runif(1, 0, 1), #Numeric attributes
              utils::tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
     }),
-    sapply(lapply(D$dataset[c(sample, neighbors),D$labels$index], sum), function(x) { #Labels
+    sapply(lapply(D$dataset[c(seedInstance, neighbors),D$labels$index], sum), function(x) { #Labels
       ifelse(x > ((length(neighbors)+1)/2), 1, 0)
     }),
     rep(NA, length(D$dataset) - D$measures$num.attributes) #Other measures like labelcount, SCUMBLE
@@ -37,7 +37,7 @@ newSample <- function(sample, refNeigh, neighbors, D) {
 #' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. MLSMOTE: Approaching imbalanced multilabel learning through synthetic instance generation. Knowledge-Based Systems, 39:385–397, 2015. ISSN 0950-7051. doi:https://doi.org/10.1016/j.knosys.2015.07.019
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
-#' @param k Number of neighbors to be considered when creatinga synthetic instance
+#' @param k Number of neighbors to be considered when creating a synthetic instance
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -49,13 +49,13 @@ newSample <- function(sample, refNeigh, neighbors, D) {
 MLSMOTE <- function(D, k) {
 
   newSamples <- unlist(pbapply::pblapply(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
-                                                                                                minBag <- as.numeric(rownames(D$dataset[D$dataset[x]==1,]))
-                                                                                                lapply(minBag, function(y) {
-                                                                                                                neighbors <- minBag[order(calculateDistances(y, minBag, x, D))[1:k+1]]
-                                                                                                                refNeigh <- sample(neighbors, size=1)
-                                                                                                                newSample(y, refNeigh, neighbors, D)
-                                                                                                              })
-                                                                                              }), recursive = FALSE)
+                                  minBag <- as.numeric(rownames(D$dataset[D$dataset[x]==1,]))
+                                  lapply(minBag, function(y) {
+                                    neighbors <- minBag[order(mldr.resampling::calculateDistances(y, minBag, x, D))[1:k+1]]
+                                    refNeigh <- sample(neighbors, size=1)
+                                    newSample(y, refNeigh, neighbors, D)
+                                  })
+                                }), recursive = FALSE)
 
   mldr::mldr_from_dataframe(rbind(D$dataset, lapply(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
 

@@ -39,13 +39,13 @@ MLeNN <- function(D, TH=0.5, NN=3) {
   majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
 
   toDelete <- unlist(pbapply::pblapply(majBag, function(x) {
-                                                  activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                                                  neighbors <- order(mldr.resampling::calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
-                                                  numDifferences <- sum(unlist(lapply(neighbors, function(y) {
-                                                    adjustedHammingDist(x,y,D) > TH
-                                                  })))
-                                                  if (numDifferences >= NN/2) { x } #Samples to delete
-                                                }))
+                                activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
+                                neighbors <- order(mldr.resampling::calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
+                                numDifferences <- sum(unlist(lapply(neighbors, function(y) {
+                                                               adjustedHammingDist(x,y,D) > TH
+                                                             })))
+                                if (numDifferences >= NN/2) { x } #Samples to delete
+                              }))
 
   mldr::mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
 
