@@ -82,7 +82,7 @@ ML_RkNNOS <- function(D, k) {
 
     cbind(S[[j - D$measures$num.inputs]], stats::setNames(lapply(D$labels$index[!D$labels$index %in% j], function(l) {
 
-      as.numeric(predict::predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
+      as.numeric(stats::predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
 
     }), names(D$dataset)[D$labels$index[!D$labels$index %in% j]]))
 
