@@ -4,10 +4,10 @@
 \alias{newSample}
 \title{Auxiliary function used by MLSMOTE. Creates a synthetic sample based on values of attributes and labels of its neighbors}
 \usage{
-newSample(sample, refNeigh, neighbors, D)
+newSample(seedInstance, refNeigh, neighbors, D)
 }
 \arguments{
-\item{sample}{Sample we are using as "template"}
+\item{seedInstance}{Sample we are using as "template"}
 
 \item{refNeigh}{Reference neighbor}
 

@@ -12,7 +12,7 @@ MLSMOTE(D, k)
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
-\item{k}{Number of neighbors to be considered when creatinga synthetic instance}
+\item{k}{Number of neighbors to be considered when creating a synthetic instance}
 }
 \value{
 A mld object containing the preprocessed multilabel dataset
