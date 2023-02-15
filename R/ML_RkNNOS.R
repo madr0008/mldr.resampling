@@ -29,7 +29,7 @@ ML_RkNNOS <- function(D, k) {
     N <- D$measures$num.instances - 2*length(min)
 
     neighbors <- lapply(min, function(i) {
-      min[order(mldr.resamplingcalculateDistances(i, min, l, D))[1:k+1]]
+      min[order(mldr.resampling::calculateDistances(i, min, l, D))[1:k+1]]
     })
 
     rNeighbors <- lapply(min, function(i) {
@@ -45,7 +45,7 @@ ML_RkNNOS <- function(D, k) {
     s <- as.data.frame(do.call(rbind, lapply(q, function(i) {
       s <- augMin[i]
       r <- sample(rNeighbors[[i]],1)
-      setNames(c(unlist(lapply(D$attributesIndexes, function(j) { #Attributes
+      stats::setNames(c(unlist(lapply(D$attributesIndexes, function(j) { #Attributes
         ifelse(D$attributes[[j]] %in% c("numeric", "Date"),
                D$dataset[s,i] + (D$dataset[r,j] - D$dataset[s,j])*stats::runif(1, 0, 1), #Numeric attributes. Falta multiplicar por dist euclidea
                sample(c(D$dataset[s,j], D$dataset[r,j]), size = 1)) #Non numeric attributes
@@ -80,9 +80,9 @@ ML_RkNNOS <- function(D, k) {
 
     S[[j - D$measures$num.inputs]][[names(D$dataset)[j]]] <- as.numeric(S[[j - D$measures$num.inputs]][[names(D$dataset)[j]]])
 
-    cbind(S[[j - D$measures$num.inputs]], setNames(lapply(D$labels$index[!D$labels$index %in% j], function(l) {
+    cbind(S[[j - D$measures$num.inputs]], stats::setNames(lapply(D$labels$index[!D$labels$index %in% j], function(l) {
 
-      as.numeric(predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
+      as.numeric(predict::predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
 
     }), names(D$dataset)[D$labels$index[!D$labels$index %in% j]]))
 
