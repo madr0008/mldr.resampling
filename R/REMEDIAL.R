@@ -8,10 +8,10 @@
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' remedial(birds)
+#' REMEDIAL(birds)
 #' }
 #' @export
-remedial <- function(mld) decoupleImbalancedLabels(mld, mld$measures$scumble)
+REMEDIAL <- function(mld) decoupleImbalancedLabels(mld, mld$measures$scumble)
 
 decoupleImbalancedLabels <- function(mld, atkLevel) {
   mldbase <- mld[mld$dataset$.SCUMBLE <= atkLevel]
