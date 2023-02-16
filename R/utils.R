@@ -1,4 +1,4 @@
-#' Auxiliary function used by to calculate the distances between an instance and the ones with a specific active label
+#' Auxiliary function used to calculate the distances between an instance and the ones with a specific active label
 #'
 #' @param sample Index of the sample whose distances to other samples we want to know
 #' @param rest Indexes of the samples to which we will calculate the distance
@@ -40,6 +40,30 @@ calculateDistances <- function(sample, rest, label, D) {
 
 
 
+
+#' Auxiliary function used to compute the neighbors of an instance
+#'
+#' @param sample Index of the sample whose neighbors we want to know
+#' @param rest Indexes of the samples among which we will search
+#' @param label Label that must be active, in order to calculate the distances
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param k Number of neighbors to be returned
+#'
+#' @return A vector with the indexes inside rest of the neighbors
+#'
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getNN(25,c(75,65,89,23),300,bibtex,3)
+#' }
+getNN <- function(sample, rest, label, D, k) {
+
+  order(calculateDistances(sample, rest, label, D))[1:k+1]
+
+}
+
+
+
 #' Auxiliary function used by MLSMOTE. Creates a synthetic sample based on values of attributes and labels of its neighbors
 #'
 #' @param seedInstance Sample we are using as "template"
@@ -68,5 +92,6 @@ newSample <- function(seedInstance, refNeigh, neighbors, D) {
   )
 
 }
+
 
 

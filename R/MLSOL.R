@@ -145,7 +145,7 @@ MLSOL <- function(D, P, k) {
   neighbors <- stats::setNames(lapply(as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
     if (length(activeLabels)>0) {
-      order(calculateDistances(i, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:k+1]
+      getNN(i, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
     }
   }), as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])))
 

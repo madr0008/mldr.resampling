@@ -40,7 +40,7 @@ MLeNN <- function(D, TH=0.5, NN=3) {
 
   toDelete <- unlist(pbapply::pblapply(majBag, function(x) {
                                 activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                                neighbors <- order(calculateDistances(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D))[1:NN+1]
+                                neighbors <- getNN(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, NN)
                                 numDifferences <- sum(unlist(lapply(neighbors, function(y) {
                                                                adjustedHammingDist(x,y,D) > TH
                                                              })))

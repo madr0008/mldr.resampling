@@ -20,7 +20,7 @@ MLSMOTE <- function(D, k) {
   newSamples <- unlist(pbapply::pblapply(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
                                   minBag <- as.numeric(rownames(D$dataset[D$dataset[x]==1,]))
                                   lapply(minBag, function(y) {
-                                    neighbors <- minBag[order(calculateDistances(y, minBag, x, D))[1:k+1]]
+                                    neighbors <- minBag[getNN(y, minBag, x, D, k)]
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
                                   })

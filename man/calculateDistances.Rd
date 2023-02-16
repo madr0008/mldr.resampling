@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{calculateDistances}
 \alias{calculateDistances}
-\title{Auxiliary function used by to calculate the distances between an instance and the ones with a specific active label}
+\title{Auxiliary function used to calculate the distances between an instance and the ones with a specific active label}
 \usage{
 calculateDistances(sample, rest, label, D)
 }
@@ -19,7 +19,7 @@ calculateDistances(sample, rest, label, D)
 A list with the distance to the rest of samples
 }
 \description{
-Auxiliary function used by to calculate the distances between an instance and the ones with a specific active label
+Auxiliary function used to calculate the distances between an instance and the ones with a specific active label
 }
 \examples{
 \dontrun{

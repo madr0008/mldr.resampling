@@ -29,7 +29,7 @@ ML_RkNNOS <- function(D, k) {
     N <- D$measures$num.instances - 2*length(min)
 
     neighbors <- lapply(min, function(i) {
-      min[order(calculateDistances(i, min, l, D))[1:k+1]]
+      min[getNN(i, min, l, D, k)]
     })
 
     rNeighbors <- lapply(min, function(i) {
