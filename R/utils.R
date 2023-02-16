@@ -110,3 +110,232 @@ newSample <- function(seedInstance, refNeigh, neighbors, D) {
 adjustedHammingDist <- function(x,y,D) {
   length(which(D$dataset[x,D$labels$index] != D$dataset[y,D$labels$index])) / (sum(D$dataset[x,D$labels$index]) + sum(D$dataset[y,D$labels$index]))
 }
+
+
+
+#' Auxiliary function used by MLSOL. Categorizes each pair instance-label of the dataset with a type
+#'
+#' @param C List of vectors with one value for each pair instance-label
+#' @param neighbors Structure with the k nearest neighbors of each instance of the dataset
+#' @param k Number of neighbors to be considered for each instance
+#' @param minoritary Vector with the minoritary value of each label (normally, 1)
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#'
+#' @return A synthetic sample derived from the one passed as a parameter and its neighbors
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' initTypes(C,c(34,65,121),3,bibtex)
+#' }
+initTypes <- function(C, neighbors, k, minoritary, D) {
+
+  t <- lapply(as.numeric(rownames(D$dataset)), function(i) {
+    unlist(lapply(D$labels$index, function(j) {
+      if (D$dataset[i,j] != minoritary[j - D$measures$num.inputs]) {
+        5
+      } else {
+        if (C[[as.character(i)]][j - D$measures$num.inputs] < 1/3) {
+          1
+        } else if (C[[as.character(i)]][j - D$measures$num.inputs] < 2/3) {
+          2
+        } else if (C[[as.character(i)]][j - D$measures$num.inputs] < 1) {
+          3
+        } else {
+          4
+        }
+      }
+    }))
+  })
+
+  change <- TRUE
+  while (change) {
+    change <- FALSE
+    for (i in 1:D$measures$num.instances) {
+      for (j in 1:D$measures$num.labels) {
+        if (t[[i]][j] == 3) {
+          for (m in neighbors[[as.character(i)]]) {
+            if (t[[m]][j] == 1 | t[[m]][j] == 2) {
+              t[[i]][j] <- 2
+              change <- TRUE
+              break
+            }
+          }
+        }
+      }
+    }
+  }
+
+  t
+
+}
+
+
+
+#' Auxiliary function used by MLSOL. Creates a synthetic sample based on two other samples, taking into account their types
+#'
+#' @param seedInstance Index of the sample we are using as "template"
+#' @param refNeigh Index of the reference neighbor
+#' @param t types of the instances
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#'
+#' @return A synthetic sample derived from the one passed as a parameter and its neighbors
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' generateInstanceMLSOL(25,28,c(1,3),bibtex)
+#' }
+generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
+
+  s <- seedInstance
+  r <- refNeigh
+
+  attributes <- as.numeric(unlist(lapply(D$attributesIndexes, function(i) { #Attributes
+    ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
+           D$dataset[s,i] + (D$dataset[r,i] - D$dataset[s,i])*stats::runif(1, 0, 1), #Numeric attributes
+           sample(c(D$dataset[s,i], D$dataset[r,i]), size = 1)) #Non numeric attributes
+  })))
+
+  #Calculate distances between attributes
+  d_s <- sum((attributes - as.numeric(unlist(D$dataset[s,D$attributesIndexes])))^2)
+  d_r <- sum((attributes - as.numeric(unlist(D$dataset[r,D$attributesIndexes])))^2)
+
+  cd <- d_s / (d_s + d_r)
+
+  labels <- c()
+
+  for (j in D$labels$index) {
+    if (D$dataset[s,j] == D$dataset[r,j]) {
+      labels <- c(labels, D$dataset[s,j])
+    } else {
+      if (t[[s]][j - D$measures$num.inputs] == 5) {
+        aux <- s
+        s <- r
+        r <- aux
+        cd <- 1 - cd
+      }
+      theta <- 0.5
+      if (t[[s]][j - D$measures$num.inputs] == 2) {
+        theta <- 0.75
+      } else if (t[[s]][j - D$measures$num.inputs] == 3) {
+        theta <- 1.00001
+      } else if (t[[s]][j - D$measures$num.inputs] == 4) {
+        theta <- -0.00001
+      }
+      if (cd <= theta) {
+        labels <- c(labels, D$dataset[s,j])
+      } else {
+        labels <- c(labels, D$dataset[r,j])
+      }
+    }
+  }
+
+  c(attributes, labels, rep(NA, length(D$dataset) - D$measures$num.attributes))
+
+}
+
+
+
+#' Auxiliary function used by MLSOL and MLUL. Computes the kNN of every instance in a dataset
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param k Number of neighbors to be included for every instance
+#'
+#' @return A list of vectors with the indexes of the neighbors for each instance
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getAllNeighbors(bibtex, 3)
+#' }
+getAllNeighbors <- function(D, d, k) {
+
+  stats::setNames(lapply(d, function(i) {
+    activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
+    if (length(activeLabels)>0) {
+      getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
+    }
+  }), d)
+
+}
+
+
+
+#' Auxiliary function used by MLSOL and MLUL. For each instance in the dataset, we compute, for each label, the proportion of neighbors having an opposite class with respect to the proper instance
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param neighbors Structure with the neighbors of every instance in the dataset
+#' @param k Number of neighbors taken into account for each instance
+#'
+#' @return A structure with the proportion of neighbors having an opposite class with respect to an instance and label
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getC(bibtex, rownames(bibtex), neighbors, 3)
+#' }
+getC <- function(D, d, neighbors, k) {
+
+  stats::setNames(lapply(d, function(i) {
+    unlist(lapply(D$labels$index, function(j) {
+      (1/k) * sum(unlist(lapply(neighbors[[as.character(i)]], function(m) {
+        ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
+      })))
+    }))
+  }), d)
+
+}
+
+
+
+#' Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of C, taking into account the global class imbalance
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param C Structure with the proportion of neighbors having an opposite class with respect to an instance and label
+#' @param minoritary Vector with the minoritary class of each label (normally, 1)
+#'
+#' @return A structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getS(bibtex, rownames(bibtex), C, rep(1, bibtex$measures$num.labels))
+#' }
+getS <- function(D, d, C, minoritary) {
+
+  stats::setNames(lapply(d, function(i) {
+    unlist(lapply(D$labels$index, function(j) {
+      if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[as.character(i)]][j - D$measures$num.inputs]<1)) {
+        numerator <- C[[as.character(i)]][j - D$measures$num.inputs]
+        denominator <- sum(unlist(lapply(d, function(x) {
+          ifelse(D$dataset[x,j]==minoritary[j - D$measures$num.inputs],C[[as.character(x)]][j - D$measures$num.inputs],0)*ifelse(C[[as.character(x)]][j - D$measures$num.inputs]<1,1,0)
+        })))
+        numerator/denominator
+      } else {
+        -1
+      }
+    }))
+  }), d)
+
+}
+
+
+
+#' Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
+#'
+#' @return A vector of weights to be considered when oversampling for each instance
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getW(bibtex, rownames(bibtex), S)
+#' }
+getW <- function(D, d, S) {
+
+  stats::setNames(lapply(d, function(i) {
+    sum(S[[as.character(i)]][!S[[as.character(i)]] %in% -1])
+  }), d)
+
+}

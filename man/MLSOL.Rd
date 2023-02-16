@@ -20,8 +20,7 @@ MLSOL(D, P, k)
 A mld object containing the preprocessed multilabel dataset
 }
 \description{
-This function implements the MLSOL algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
-whose aim is to identify instances with minoritary labels, and generate synthetic instances based on their neighbor instances.
+This function implements the MLSOL algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets, which applies oversampling on difficult regions of the instance space, in order to help classifiers distinguish labels.
 }
 \examples{
 \dontrun{
