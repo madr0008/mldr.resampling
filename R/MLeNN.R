@@ -1,21 +1,3 @@
-#' Auxiliary function used by MLeNN. Computes the Hamming Distance between two instances
-#'
-#' @param x Index of sample 1
-#' @param y Index of sample 2
-#' @param D mld \code{mldr} object in which the instances are located
-#'
-#' @return The Hamming Distance between the instances
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' adjustedHammingDist(1,2,bibtex)
-#' }
-adjustedHammingDist <- function(x,y,D) {
-  length(which(D$dataset[x,D$labels$index] != D$dataset[y,D$labels$index])) / (sum(D$dataset[x,D$labels$index]) + sum(D$dataset[y,D$labels$index]))
-}
-
-
-
 #' @title Multilabel edited Nearest Neighbor (MLeNN)
 #'
 #' @description This function implements the MLeNN algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
