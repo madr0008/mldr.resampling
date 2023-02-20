@@ -339,3 +339,88 @@ getW <- function(D, d, S) {
   }), d)
 
 }
+
+
+
+#' Auxiliary function used by MLUL. For each instance in the dataset, given the neighbors structure, we compute its reverse nearest neighbors
+#'
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param neighbors Structure with the neighbors of every instance in the dataset
+#' @param k Number of neighbors to be considered
+#'
+#' @return A list of vectors with the indexes of the reverse nearest neighbors of every instance in the dataset
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getAllReverseNeighbors(rownames(bibtex), neighbors, 3)
+#' }
+getAllReverseNeighbors <- function(d, neighbors, k) {
+
+  stats::setNames(lapply(d, function(i) {
+    d[ceiling(which(unlist(neighbors)==i)/k)]
+  }), d)
+
+}
+
+
+
+#' Auxiliary function used by MLUL. It computes the influence of each instance with respect to its reverse neighbors
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param rNeighbors Structure with the reverse nearest neighbors of each instance of the dataset
+#' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
+#'
+#' @return A list of values of influence for each instance with respect to its reverse neighbors
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getU(bibtex, rownames(bibtex), rNeighbors, S)
+#' }
+getU <- function(D, d, rNeighbors, S) {
+
+  stats::setNames(lapply(d, function(i) {
+
+    sum(unlist(lapply(D$labels$index, function(j) {
+
+        ifelse(length(rNeighbors[[as.character(i)]]) > 0,
+
+        sum(unlist(lapply(rNeighbors[[as.character(i)]], function(m) {
+
+          ifelse(S[[as.character(m)]][j - D$measures$num.inputs]==-1,0,ifelse(D$dataset[i,j]==D$dataset[m,j],1,-1)*S[[as.character(m)]][j - D$measures$num.inputs])
+
+        }))) / length(rNeighbors[[as.character(i)]]), 0)
+
+    })))
+
+  }), d)
+
+}
+
+
+
+#' Auxiliary function used by MLUL. It calculates, for each instance, how important it is in the dataset
+#'
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param w List of weights for each instance
+#' @param u List of influences in reverse neighbors for each instance
+#'
+#' @return A list with the values of importance of each instance in the dataset
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' getV(rownames(bibtex), w, u)
+#' }
+getV <- function(d, w, u) {
+
+  v <- lapply(d, function(i) {
+         w[[as.character(i)]] + u[[as.character(i)]]
+       })
+
+  minimum <- min(unlist(v))
+
+  stats::setNames(lapply(v, function(x) {
+    x - minimum
+  }), d)
+
+}
