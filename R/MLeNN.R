@@ -7,7 +7,7 @@
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param TH threshold for the Hamming Distance in order to consider an instance different to another one. Defaults to 0.5.
-#' @param NN number of nearest neighbours to check for each instance. Defaults to 3.
+#' @param k number of nearest neighbours to check for each instance. Defaults to 3.
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
@@ -16,17 +16,17 @@
 #' MLeNN(bibtex, 0.5, 3)
 #' }
 #' @export
-MLeNN <- function(D, TH=0.5, NN=3) {
+MLeNN <- function(D, TH=0.5, k=3) {
 
   majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
 
   toDelete <- unlist(pbapply::pblapply(majBag, function(x) {
                                 activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                                neighbors <- getNN(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, NN)
+                                neighbors <- getNN(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
                                 numDifferences <- sum(unlist(lapply(neighbors, function(y) {
                                                                adjustedHammingDist(x,y,D) > TH
                                                              })))
-                                if (numDifferences >= NN/2) { x } #Samples to delete
+                                if (numDifferences >= k/2) { x } #Samples to delete
                               }))
 
   mldr::mldr_from_dataframe(D$dataset[-toDelete[!is.na(toDelete)],], D$labels$index, D$attributes, D$name)
