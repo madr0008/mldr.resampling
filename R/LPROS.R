@@ -53,14 +53,14 @@ LPROS <- function(D, P) {
     rBag <- min(meanSize - length(labelSetBag[[minBag[i]]]), meanInc)
     remainder[i] <- meanInc - rBag
     #Clone instances
-    labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=FALSE)])
+    labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=TRUE)])
     aux <- c(aux, rep(i, length(labelSetBag[[minBag[i]]])))
   }
 
   #Distribute among bags
   remainder[1] <- round(remainder[1] + samplesToIncrease - meanInc*length(minBag))
   i <- 1
-  while ((remainder[i] != 0) && (i <= length(remainder))) {
+  while ((remainder[i] > 0) && (i <= length(remainder))) {
     x <- sample(aux, size = round(remainder[i]), replace=FALSE)
     bags <- table(x)
     for (j in 1:length(bags)) {
