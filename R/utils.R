@@ -424,3 +424,113 @@ getV <- function(d, w, u) {
   }), d)
 
 }
+
+
+
+#' Auxiliary function used by resample. It executes an algorithm, given as a string, and stores the resulting MLD in a arff file
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param a String with the name of the algorithm to be applied.
+#' @param P Percentage in which the original dataset is increased/decreased (if required by the algorithm)
+#' @param k Number of neighbors taken into account for each instance (if required by the algorithm)
+#' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)
+#'
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' executeAlgorithm(bibtex, "MLSMOTE", k=3)
+#' }
+executeAlgorithm <- function(D, a, P, k, TH) {
+
+  if (!(a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS", "MLRkNNOS", "MLSMOTE", "MLSOL", "MLUL", "MLeNN", "MLTL", "REMEDIAL"))) {
+    print(paste("Error: There is no algorithm named", a))
+  } else {
+
+    f <- get(a)
+    if (a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS")) {
+      name <- paste(D$name, a, "P", P, sep = "_")
+      print(paste("Running",a,"on",D$name,"with P =",P))
+      d <- f(D, P)
+    } else if (a %in% c("MLRkNNOS", "MLSMOTE")) {
+      name <- paste(D$name, a, "k", k, sep = "_")
+      print(paste("Running",a,"on",D$name,"with k =",k))
+      d <- f(D, k)
+    } else if (a %in% c("MLSOL", "MLUL")) {
+      name <- paste(D$name, a, "P", P, "k", k, sep = "_")
+      print(paste("Running",a,"on",D$name,"with P =",P,"and k =",k))
+      d <- f(D, P, k)
+    } else if (a == "MLeNN") {
+      name <- paste(D$name, a, "TH", TH, "k", k, sep = "_")
+      print(paste("Running",a,"on",D$name,"with TH =",TH,"and k =",k))
+      d <- f(D, TH, k)
+    } else if (a == "MLTL") {
+      name <- paste(D$name, a, "TH", TH, sep = "_")
+      print(paste("Running",a,"on",D$name,"with TH =",TH))
+      d <- f(D, TH)
+    } else { #REMEDIAL
+      name <- a
+      print(paste("Running",a,"on",D$name))
+      d <- f(D)
+    }
+
+    mldr::write_arff(d, name)
+
+  }
+
+}
+
+
+
+#' Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param algorithms String, or string vector, with the name(s) of the algorithm(s) to be applied.
+#' @param P Percentage in which the original dataset is increased/decreased, if required by the algorithm(s)
+#' @param k Number of neighbors taken into account for each instance, if required by the algorithm(s)
+#' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s)
+#' @param params Dataframe with 4 columns: name of the algorithm, P, k and TH, in order to execute several algorithms with different values for their parameters
+#'
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' resample(bibtex, "MLSMOTE", k=3)
+#' resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
+#' resample(bibtex, params)
+#' }
+resample <- function(D, algorithms, P=25, k=3, TH=0.5, params) {
+
+  if (missing(D)) {
+
+    print("Please, provide a mld object as the original dataset")
+
+  } else {
+
+    if (missing(algorithms)) {
+
+      if (missing(params)) {
+
+        print("Please, specify the algorithms to be applied, either with the parameter algorithms or with params")
+
+      } else {
+
+        for(i in 1:nrow(params)) {
+
+          executeAlgorithm(D,params[i,1],params[i,2],params[i,3],params[i,4])
+
+        }
+
+      }
+
+    } else {
+
+      for (a in algorithms) {
+
+        executeAlgorithm(D, a, P, k, TH)
+
+      }
+
+    }
+
+  }
+
+}
