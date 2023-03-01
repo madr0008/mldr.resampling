@@ -12,10 +12,10 @@
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' ML_ROS(bibtex, 25)
+#' MLROS(bibtex, 25)
 #' }
 #' @export
-ML_ROS <- function(D, P) {
+MLROS <- function(D, P) {
 
   #Calculate the number of samples to deleted in order to decrease in percentage P
   samplesToClone <- (D$measures$num.instances  / 100) * P

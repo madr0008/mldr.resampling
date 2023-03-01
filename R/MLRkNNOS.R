@@ -11,10 +11,10 @@
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' ML_RkNNOS(bibtex, 3)
+#' MLRkNNOS(bibtex, 3)
 #' }
 #' @export
-ML_RkNNOS <- function(D, k) {
+MLRkNNOS <- function(D, k) {
 
   minoritary <- unlist(lapply(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
   numeric <- names(D$attributes[D$attributes == "numeric" | D$attributes == "numeric" ])

@@ -12,10 +12,10 @@
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' LP_RUS(bibtex, 25)
+#' LPRUS(bibtex, 25)
 #' }
 #' @export
-LP_RUS <- function(D, P) {
+LPRUS <- function(D, P) {
 
   #Calculate the number of samples to deleted in order to decrease in percentage P
   samplesToDelete <- (D$measures$num.instances  / 100) * P

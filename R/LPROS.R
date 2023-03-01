@@ -12,10 +12,10 @@
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' LP_ROS(bibtex, 25)
+#' LPROS(bibtex, 25)
 #' }
 #' @export
-LP_ROS <- function(D, P) {
+LPROS <- function(D, P) {
 
   #Calculate the number of samples to generated in order to increase in percentage P
   samplesToIncrease <- (D$measures$num.instances  / 100) * P
