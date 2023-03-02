@@ -513,6 +513,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory) {
 #' resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
 #' resample(bibtex, params)
 #' }
+#' @export
 resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=getwd()) {
 
   if (missing(D)) {
