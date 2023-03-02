@@ -17,6 +17,6 @@
 #' @export
 MLRUS <- function(D, P) {
 
-  mldr::mldr_from_dataframe(D$dataset[-sample(c(1:D$measures$num.instances)[-as.numeric(rownames(D$dataset[rowSums(D$dataset[D$labels[D$labels$IRLbl > D$measures$meanIR,]$index]) > 0,]))],(D$measures$num.instances  / 100) * P,replace=FALSE),], D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(D$dataset[-sample(c(1:D$measures$num.instances)[-as.numeric(rownames(D$dataset[rowSums(D$dataset[D$labels[D$labels$IRLbl > D$measures$meanIR,]$index]) > 0,]))],(D$measures$num.instances  / 100) * P,replace=TRUE),], D$labels$index, D$attributes, D$name)
 
 }
