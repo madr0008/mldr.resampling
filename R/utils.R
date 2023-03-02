@@ -434,13 +434,14 @@ getV <- function(d, w, u) {
 #' @param P Percentage in which the original dataset is increased/decreased (if required by the algorithm)
 #' @param k Number of neighbors taken into account for each instance (if required by the algorithm)
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)
+#' @param outputDirectory Route with the directory where the generated ARFF file will be stored
 #'
 #' @examples
 #' \dontrun{
 #' library(mldr)
 #' executeAlgorithm(bibtex, "MLSMOTE", k=3)
 #' }
-executeAlgorithm <- function(D, a, P, k, TH) {
+executeAlgorithm <- function(D, a, P, k, TH, outputDirectory) {
 
   if (!(a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS", "MLRkNNOS", "MLSMOTE", "MLSOL", "MLUL", "MLeNN", "MLTL", "REMEDIAL"))) {
     print(paste("Error: There is no algorithm named", a))
@@ -487,7 +488,7 @@ executeAlgorithm <- function(D, a, P, k, TH) {
 
     print(paste("Time taken (in seconds):",as.numeric(endTime - startTime, units="secs")))
 
-    mldr::write_arff(d, name)
+    mldr::write_arff(d, paste(outputDirectory, name, sep="/"))
 
   }
 
@@ -499,10 +500,11 @@ executeAlgorithm <- function(D, a, P, k, TH) {
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param algorithms String, or string vector, with the name(s) of the algorithm(s) to be applied.
-#' @param P Percentage in which the original dataset is increased/decreased, if required by the algorithm(s)
-#' @param k Number of neighbors taken into account for each instance, if required by the algorithm(s)
-#' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s)
+#' @param P Percentage in which the original dataset is increased/decreased, if required by the algorithm(s). Defaults to 25
+#' @param k Number of neighbors taken into account for each instance, if required by the algorithm(s). Defaults to 3
+#' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s). Defaults to 0.5
 #' @param params Dataframe with 4 columns: name of the algorithm, P, k and TH, in order to execute several algorithms with different values for their parameters
+#' @param outputDirectory Route with the directory where generated ARFF files will be stored. Defaults to the working directory
 #'
 #' @examples
 #' \dontrun{
@@ -511,7 +513,7 @@ executeAlgorithm <- function(D, a, P, k, TH) {
 #' resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
 #' resample(bibtex, params)
 #' }
-resample <- function(D, algorithms, P=25, k=3, TH=0.5, params) {
+resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=getwd()) {
 
   if (missing(D)) {
 
@@ -533,15 +535,19 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params) {
 
         }
 
+        print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
+
       }
 
     } else {
 
       for (a in algorithms) {
 
-        executeAlgorithm(D, a, P, k, TH)
+        executeAlgorithm(D, a, P, k, TH, outputDirectory)
 
       }
+
+      print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 
     }
 

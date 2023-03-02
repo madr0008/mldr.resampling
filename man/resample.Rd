@@ -4,20 +4,30 @@
 \alias{resample}
 \title{Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files}
 \usage{
-resample(D, algorithms, P = 25, k = 3, TH = 0.5, params)
+resample(
+  D,
+  algorithms,
+  P = 25,
+  k = 3,
+  TH = 0.5,
+  params,
+  outputDirectory = getwd()
+)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
 \item{algorithms}{String, or string vector, with the name(s) of the algorithm(s) to be applied.}
 
-\item{P}{Percentage in which the original dataset is increased/decreased, if required by the algorithm(s)}
+\item{P}{Percentage in which the original dataset is increased/decreased, if required by the algorithm(s). Defaults to 25}
 
-\item{k}{Number of neighbors taken into account for each instance, if required by the algorithm(s)}
+\item{k}{Number of neighbors taken into account for each instance, if required by the algorithm(s). Defaults to 3}
 
-\item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s)}
+\item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s). Defaults to 0.5}
 
 \item{params}{Dataframe with 4 columns: name of the algorithm, P, k and TH, in order to execute several algorithms with different values for their parameters}
+
+\item{outputDirectory}{Route with the directory where generated ARFF files will be stored. Defaults to the working directory}
 }
 \description{
 Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files
