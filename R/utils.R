@@ -450,28 +450,42 @@ executeAlgorithm <- function(D, a, P, k, TH) {
     if (a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS")) {
       name <- paste(D$name, a, "P", P, sep = "_")
       print(paste("Running",a,"on",D$name,"with P =",P))
+      startTime <- Sys.time()
       d <- f(D, P)
+      endTime <- Sys.time()
     } else if (a %in% c("MLRkNNOS", "MLSMOTE")) {
       name <- paste(D$name, a, "k", k, sep = "_")
       print(paste("Running",a,"on",D$name,"with k =",k))
+      startTime <- Sys.time()
       d <- f(D, k)
+      endTime <- Sys.time()
     } else if (a %in% c("MLSOL", "MLUL")) {
       name <- paste(D$name, a, "P", P, "k", k, sep = "_")
       print(paste("Running",a,"on",D$name,"with P =",P,"and k =",k))
+      startTime <- Sys.time()
       d <- f(D, P, k)
+      endTime <- Sys.time()
     } else if (a == "MLeNN") {
       name <- paste(D$name, a, "TH", TH, "k", k, sep = "_")
       print(paste("Running",a,"on",D$name,"with TH =",TH,"and k =",k))
+      startTime <- Sys.time()
       d <- f(D, TH, k)
+      endTime <- Sys.time()
     } else if (a == "MLTL") {
       name <- paste(D$name, a, "TH", TH, sep = "_")
       print(paste("Running",a,"on",D$name,"with TH =",TH))
+      startTime <- Sys.time()
       d <- f(D, TH)
+      endTime <- Sys.time()
     } else { #REMEDIAL
       name <- a
       print(paste("Running",a,"on",D$name))
+      startTime <- Sys.time()
       d <- f(D)
+      endTime <- Sys.time()
     }
+
+    print(paste("Time taken (in seconds):",as.numeric(endTime - startTime, units="secs")))
 
     mldr::write_arff(d, name)
 
