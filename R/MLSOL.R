@@ -29,7 +29,7 @@ MLSOL <- function(D, P, k) {
 
   w <- getW(D, d, S)
 
-  t <- initTypes(C, neighbors, k, minoritary)
+  t <- initTypes(C, neighbors, k, minoritary, D)
 
   genNum <- (D$measures$num.instances/100) * P
 
