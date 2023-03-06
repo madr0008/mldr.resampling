@@ -42,19 +42,26 @@ MLRkNNOS <- function(D, k) {
 
     q <- sample.int(length(augMin),N,replace=TRUE)
 
-    s <- as.data.frame(do.call(rbind, lapply(q, function(i) {
+    aux <- as.data.frame(do.call(rbind, lapply(q, function(i) {
+
       s <- augMin[i]
       r <- sample(rNeighbors[[i]],1)
-      stats::setNames(c(unlist(lapply(D$attributesIndexes, function(j) { #Attributes
-        ifelse(D$attributes[[j]] %in% c("numeric", "Date"),
-               D$dataset[s,i] + (D$dataset[r,j] - D$dataset[s,j])*stats::runif(1, 0, 1), #Numeric attributes. Falta multiplicar por dist euclidea
-               sample(c(D$dataset[s,j], D$dataset[r,j]), size = 1)) #Non numeric attributes
+
+      stats::setNames(c(unlist(lapply(D$attributesIndexes, function(j) {
+
+          if (D$attributes[[j]] %in% c("numeric", "Date")) {
+            D$dataset[s,j] + (D$dataset[r,j] - D$dataset[s,j])*stats::runif(1, 0, 1) #Numeric attributes. Falta multiplicar por dist euclidea
+          } else {
+            sample(c(D$dataset[s,j], D$dataset[r,j]), size = 1) #Non numeric attributes
+          }
+
       })), minoritary[l-D$measures$num.inputs]), names(D$attributes[c(D$attributesIndexes,l)]))
+
     })))
 
-    s[numeric] <- as.numeric(unlist(s[numeric]))
-    s[factors] <- lapply(factors, function(i) { factor(s[[i]], levels=unique(D$dataset[[i]])) })
-    s
+    aux[numeric] <- as.numeric(unlist(aux[numeric]))
+    aux[factors] <- lapply(factors, function(i) { factor(aux[[i]], levels=unique(D$dataset[[i]])) })
+    aux
 
   })
 
@@ -76,7 +83,7 @@ MLRkNNOS <- function(D, k) {
 
   print("Part 3/3: Predicting labels")
 
-  toRet <- as.data.frame(data.table::rbindlist(list(D$dataset, data.table::rbindlist(pbapply::pblapply(D$labels$index, function(j) {
+  toRet <- as.data.frame(data.table::rbindlist(list(D$dataset, data.table::rbindlist(lapply(D$labels$index, function(j) {
 
     S[[j - D$measures$num.inputs]][[names(D$dataset)[j]]] <- as.numeric(S[[j - D$measures$num.inputs]][[names(D$dataset)[j]]])
 
@@ -85,6 +92,7 @@ MLRkNNOS <- function(D, k) {
       as.numeric(stats::predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
 
     }), names(D$dataset)[D$labels$index[!D$labels$index %in% j]]))
+
 
   }), fill=TRUE, use.names=TRUE)), fill=TRUE, use.names=TRUE))
 
