@@ -2,7 +2,7 @@ Package: mldr.resampling
 Title: Resampling algorithms for Multilabel Datasets
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Miguel Ángel", "Dávila", , "madr0008@red.ujaen.es", role = "cre"),
+    person("Miguel Ángel", "Dávila", , "mdavila@ujaen.es", role = "cre"),
     person("Francisco", "Charte", email = "fcharte@ujaen.es", role = "aut", comment = c(ORCID = "0000-0002-3083-8942")),
     person("María José", "Del Jesús", email = "mjjesus@ujaen.es", role = "aut", comment = c(ORCID = "0000-0002-7891-3059"))
     )
