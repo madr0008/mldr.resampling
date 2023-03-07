@@ -81,7 +81,7 @@ getNN <- function(sample, rest, label, D, k) {
 newSample <- function(seedInstance, refNeigh, neighbors, D) {
 
   c(
-    lapply(D$attributesIndexes, function(i) { #Attributes
+    lapply(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
       ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
              D$dataset[seedInstance,i] + (D$dataset[refNeigh,i] - D$dataset[seedInstance,i])*stats::runif(1, 0, 1), #Numeric attributes
              utils::tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
@@ -190,15 +190,15 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
   s <- seedInstance
   r <- refNeigh
 
-  attributes <- as.numeric(unlist(lapply(D$attributesIndexes, function(i) { #Attributes
+  attributes <- as.numeric(unlist(lapply(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
     ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
            D$dataset[s,i] + (D$dataset[r,i] - D$dataset[s,i])*stats::runif(1, 0, 1), #Numeric attributes
            sample(c(D$dataset[s,i], D$dataset[r,i]), size = 1)) #Non numeric attributes
   })))
 
   #Calculate distances between attributes
-  d_s <- sum((attributes - as.numeric(unlist(D$dataset[s,D$attributesIndexes])))^2)
-  d_r <- sum((attributes - as.numeric(unlist(D$dataset[r,D$attributesIndexes])))^2)
+  d_s <- sum((attributes - as.numeric(unlist(D$dataset[s,D$attributesIndexes[1:D$measures$num.inputs]])))^2)
+  d_r <- sum((attributes - as.numeric(unlist(D$dataset[r,D$attributesIndexes[1:D$measures$num.inputs]])))^2)
 
   cd <- d_s / (d_s + d_r)
 
@@ -560,7 +560,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       if (("MLSOL" %in% algorithms | "MLUL" %in% algorithms) & (sum(ifelse(is.na(table(algorithms)["MLSOL"]),0,table(algorithms)["MLSOL"]), ifelse(is.na(table(algorithms)["MLUL"]),0,table(algorithms)["MLUL"])) > 1)) {
 
-        print(paste("Calculating neighbors structures for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
+        print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
         startTime <- Sys.time()
         neighbors <- getAllNeighbors(D, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), D$measures$num.instances)
         endTime <- Sys.time()
