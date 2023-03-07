@@ -7,6 +7,7 @@
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param P Percentage in which the original dataset is increased
 #' @param k Number of neighbors to be considered when computing the neighbors of an instance
+#' @param neighbors Structure with all instances and neighbors in the dataset. If it is empty, it will be calculated by the function
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -15,13 +16,21 @@
 #' MLSOL(bibtex, 3)
 #' }
 #' @export
-MLSOL <- function(D, P, k) {
+MLSOL <- function(D, P, k, neighbors=NULL) {
 
   minoritary <- unlist(lapply(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
 
   d <- as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,]))
 
-  neighbors <- getAllNeighbors(D, d, k)
+  if (is.null(neighbors)) {
+    print("Part 1/3: Calculating neighbors structure")
+    neighbors <- getAllNeighbors(D, d, k)
+  } else {
+    print("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
+    neighbors <- stats::setNames(lapply(neighbors, function(x) { x[1:k+1] }), names(neighbors))
+  }
+
+  print("Part 2/3: Calculating auxiliary structures")
 
   C <- getC(D, d, neighbors, k)
 
@@ -35,7 +44,9 @@ MLSOL <- function(D, P, k) {
 
   seedInstances <- sample(d, size=genNum, replace=TRUE, prob=w)
 
-  newSamples <- lapply(seedInstances, function(i) {
+  print("Part 3/3: Generating new instances")
+
+  newSamples <- pbapply::pblapply(seedInstances, function(i) {
     generateInstanceMLSOL(i, sample(neighbors[[as.character(i)]], size=1), t, D)
   })
 

@@ -4,7 +4,7 @@
 \alias{executeAlgorithm}
 \title{Auxiliary function used by resample. It executes an algorithm, given as a string, and stores the resulting MLD in a arff file}
 \usage{
-executeAlgorithm(D, a, P, k, TH, outputDirectory)
+executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
@@ -18,6 +18,8 @@ executeAlgorithm(D, a, P, k, TH, outputDirectory)
 \item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)}
 
 \item{outputDirectory}{Route with the directory where the generated ARFF file will be stored}
+
+\item{neighbors}{Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL}
 }
 \description{
 Auxiliary function used by resample. It executes an algorithm, given as a string, and stores the resulting MLD in a arff file

@@ -130,7 +130,7 @@ adjustedHammingDist <- function(x,y,D) {
 #' }
 initTypes <- function(C, neighbors, k, minoritary, D) {
 
-  t <- lapply(as.numeric(rownames(D$dataset)), function(i) {
+  t <- pbapply::pblapply(as.numeric(rownames(D$dataset)), function(i) {
     unlist(lapply(D$labels$index, function(j) {
       if (D$dataset[i,j] != minoritary[j - D$measures$num.inputs]) {
         5
@@ -250,7 +250,7 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #' }
 getAllNeighbors <- function(D, d, k) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
     if (length(activeLabels)>0) {
       getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
@@ -276,7 +276,7 @@ getAllNeighbors <- function(D, d, k) {
 #' }
 getC <- function(D, d, neighbors, k) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
     unlist(lapply(D$labels$index, function(j) {
       (1/k) * sum(unlist(lapply(neighbors[[as.character(i)]], function(m) {
         ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
@@ -303,7 +303,7 @@ getC <- function(D, d, neighbors, k) {
 #' }
 getS <- function(D, d, C, minoritary) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
     unlist(lapply(D$labels$index, function(j) {
       if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[as.character(i)]][j - D$measures$num.inputs]<1)) {
         numerator <- C[[as.character(i)]][j - D$measures$num.inputs]
@@ -335,7 +335,7 @@ getS <- function(D, d, C, minoritary) {
 #' }
 getW <- function(D, d, S) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
     sum(S[[as.character(i)]][!S[[as.character(i)]] %in% -1])
   }), d)
 
@@ -357,7 +357,7 @@ getW <- function(D, d, S) {
 #' }
 getAllReverseNeighbors <- function(d, neighbors, k) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
     d[ceiling(which(unlist(neighbors)==i)/k)]
   }), d)
 
@@ -380,7 +380,7 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 #' }
 getU <- function(D, d, rNeighbors, S) {
 
-  stats::setNames(lapply(d, function(i) {
+  stats::setNames(pbapply::pblapply(d, function(i) {
 
     sum(unlist(lapply(D$labels$index, function(j) {
 
@@ -414,7 +414,7 @@ getU <- function(D, d, rNeighbors, S) {
 #' }
 getV <- function(d, w, u) {
 
-  v <- lapply(d, function(i) {
+  v <- pbapply::pblapply(d, function(i) {
          w[[as.character(i)]] + u[[as.character(i)]]
        })
 
@@ -436,13 +436,14 @@ getV <- function(d, w, u) {
 #' @param k Number of neighbors taken into account for each instance (if required by the algorithm)
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)
 #' @param outputDirectory Route with the directory where the generated ARFF file will be stored
+#' @param neighbors Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL
 #'
 #' @examples
 #' \dontrun{
 #' library(mldr)
 #' executeAlgorithm(bibtex, "MLSMOTE", k=3)
 #' }
-executeAlgorithm <- function(D, a, P, k, TH, outputDirectory) {
+executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors) {
 
   if (!(a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS", "MLRkNNOS", "MLSMOTE", "MLSOL", "MLUL", "MLeNN", "MLTL", "REMEDIAL"))) {
     print(paste("Error: There is no algorithm named", a))
@@ -465,7 +466,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory) {
       name <- paste(D$name, a, "P", P, "k", k, sep = "_")
       print(paste("Running",a,"on",D$name,"with P =",P,"and k =",k))
       startTime <- Sys.time()
-      d <- f(D, P, k)
+      d <- f(D, P, k, neighbors)
       endTime <- Sys.time()
     } else if (a == "MLeNN") {
       name <- paste(D$name, a, "TH", TH, "k", k, sep = "_")
@@ -527,13 +528,25 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       if (missing(params)) {
 
-        print("Please, specify the algorithms to be applied, either with the parameter algorithms or with params")
+        print("Please, specify the dataset and algorithms to be applied, either with the parameter algorithms or with params")
 
       } else {
 
+        neighbors <- NULL
+
+        if (("MLSOL" %in% params[1] | "MLUL" %in% params[1]) & (sum(ifelse(is.na(table(params[1])["MLSOL"]),0,table(params[1])["MLSOL"]), ifelse(is.na(table(params[1])["MLUL"]),0,table(params[1])["MLUL"])) > 1)) {
+
+          print(paste("Calculating neighbors structures for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
+          startTime <- Sys.time()
+          neighbors <- getAllNeighbors(D, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), D$measures$num.instances)
+          endTime <- Sys.time()
+          print(paste("Time taken (in seconds):",as.numeric(endTime - startTime, units="secs")))
+
+        }
+
         for(i in 1:nrow(params)) {
 
-          executeAlgorithm(D,params[i,1],params[i,2],params[i,3],params[i,4])
+          executeAlgorithm(D,params[i,1],params[i,2],params[i,3],params[i,4], neighbors)
 
         }
 
@@ -543,9 +556,21 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
     } else {
 
+      neighbors <- NULL
+
+      if (("MLSOL" %in% algorithms | "MLUL" %in% algorithms) & (sum(ifelse(is.na(table(algorithms)["MLSOL"]),0,table(algorithms)["MLSOL"]), ifelse(is.na(table(algorithms)["MLUL"]),0,table(algorithms)["MLUL"])) > 1)) {
+
+        print(paste("Calculating neighbors structures for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
+        startTime <- Sys.time()
+        neighbors <- getAllNeighbors(D, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), D$measures$num.instances)
+        endTime <- Sys.time()
+        print(paste("Time taken (in seconds):",as.numeric(endTime - startTime, units="secs")))
+
+      }
+
       for (a in algorithms) {
 
-        executeAlgorithm(D, a, P, k, TH, outputDirectory)
+        executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors)
 
       }
 

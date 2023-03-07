@@ -7,6 +7,7 @@
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param P Percentage in which the original dataset is decreased
 #' @param k Number of neighbors to be considered when computing the neighbors of an instance
+#' @param neighbors Structure with all instances and neighbors in the dataset. If it is empty, it will be calculated by the function
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -15,13 +16,21 @@
 #' MLUL(bibtex, 3)
 #' }
 #' @export
-MLUL <- function(D, P, k) {
+MLUL <- function(D, P, k, neighbors=NULL) {
 
   minoritary <- unlist(lapply(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
 
   d <- as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,]))
 
-  neighbors <- getAllNeighbors(D, d, k)
+  if (is.null(neighbors)) {
+    print("Part 1/2: Calculating neighbors structure")
+    neighbors <- getAllNeighbors(D, d, k)
+  } else {
+    print("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
+    neighbors <- stats::setNames(lapply(neighbors, function(x) { x[1:k+1] }), names(neighbors))
+  }
+
+  print("Part 2/2: Calculating auxiliary structures and removing instances")
 
   rNeighbors <- getAllReverseNeighbors(d, neighbors, k)
 

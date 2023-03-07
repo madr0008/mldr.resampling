@@ -7,7 +7,7 @@
 Liu, B., Blekas, K., & Tsoumakas, G. (2022). Multi-label sampling based on local label imbalance. Pattern Recognition, 122, 108294.
 }
 \usage{
-MLSOL(D, P, k)
+MLSOL(D, P, k, neighbors = NULL)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
@@ -15,6 +15,8 @@ MLSOL(D, P, k)
 \item{P}{Percentage in which the original dataset is increased}
 
 \item{k}{Number of neighbors to be considered when computing the neighbors of an instance}
+
+\item{neighbors}{Structure with all instances and neighbors in the dataset. If it is empty, it will be calculated by the function}
 }
 \value{
 A mld object containing the preprocessed multilabel dataset
