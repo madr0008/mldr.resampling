@@ -47,7 +47,7 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
   print("Part 3/3: Generating new instances")
 
   newSamples <- pbapply::pblapply(seedInstances, function(i) {
-    generateInstanceMLSOL(i, sample(neighbors[[as.character(i)]], size=1), t, D)
+    generateInstanceMLSOL(i, sample(neighbors[i], size=1), t, D)
   })
 
   mldr::mldr_from_dataframe(rbind(D$dataset, lapply(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
