@@ -20,14 +20,14 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
 
   minoritary <- unlist(lapply(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
 
-  d <- as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,]))
+  d <- c(1:D$measures$num.instances)[D$dataset$.labelcount > 0]
 
   if (is.null(neighbors)) {
     print("Part 1/3: Calculating neighbors structure")
     neighbors <- getAllNeighbors(D, d, k)
   } else {
     print("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- stats::setNames(lapply(neighbors, function(x) { x[1:k+1] }), names(neighbors))
+    neighbors <- lapply(neighbors, function(x) { x[1:k+1] })
   }
 
   print("Part 2/3: Calculating auxiliary structures")
@@ -38,7 +38,7 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
 
   w <- getW(D, d, S)
 
-  t <- initTypes(C, neighbors, k, minoritary, D)
+  t <- initTypes(C, neighbors, k, minoritary, D, d)
 
   genNum <- (D$measures$num.instances/100) * P
 

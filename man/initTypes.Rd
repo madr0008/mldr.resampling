@@ -4,7 +4,7 @@
 \alias{initTypes}
 \title{Auxiliary function used by MLSOL. Categorizes each pair instance-label of the dataset with a type}
 \usage{
-initTypes(C, neighbors, k, minoritary, D)
+initTypes(C, neighbors, k, minoritary, D, d)
 }
 \arguments{
 \item{C}{List of vectors with one value for each pair instance-label}
@@ -16,6 +16,8 @@ initTypes(C, neighbors, k, minoritary, D)
 \item{minoritary}{Vector with the minoritary value of each label (normally, 1)}
 
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
+
+\item{d}{Vector with the instances of the dataset which have one or more label active (ideally, all of them)}
 }
 \value{
 A synthetic sample derived from the one passed as a parameter and its neighbors

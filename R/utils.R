@@ -121,6 +121,7 @@ adjustedHammingDist <- function(x,y,D) {
 #' @param k Number of neighbors to be considered for each instance
 #' @param minoritary Vector with the minoritary value of each label (normally, 1)
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
 #'
 #' @return A synthetic sample derived from the one passed as a parameter and its neighbors
 #' @examples
@@ -128,18 +129,18 @@ adjustedHammingDist <- function(x,y,D) {
 #' library(mldr)
 #' initTypes(C,c(34,65,121),3,bibtex)
 #' }
-initTypes <- function(C, neighbors, k, minoritary, D) {
+initTypes <- function(C, neighbors, k, minoritary, D, d) {
 
-  t <- pbapply::pblapply(as.numeric(rownames(D$dataset)), function(i) {
+  t <- pbapply::pblapply(d, function(i) {
     unlist(lapply(D$labels$index, function(j) {
       if (D$dataset[i,j] != minoritary[j - D$measures$num.inputs]) {
         5
       } else {
-        if (C[[as.character(i)]][j - D$measures$num.inputs] < 1/3) {
+        if (C[[i]][j - D$measures$num.inputs] < 1/3) {
           1
-        } else if (C[[as.character(i)]][j - D$measures$num.inputs] < 2/3) {
+        } else if (C[[i]][j - D$measures$num.inputs] < 2/3) {
           2
-        } else if (C[[as.character(i)]][j - D$measures$num.inputs] < 1) {
+        } else if (C[[i]][j - D$measures$num.inputs] < 1) {
           3
         } else {
           4
@@ -151,10 +152,10 @@ initTypes <- function(C, neighbors, k, minoritary, D) {
   change <- TRUE
   while (change) {
     change <- FALSE
-    for (i in 1:D$measures$num.instances) {
+    for (i in d) {
       for (j in 1:D$measures$num.labels) {
         if (t[[i]][j] == 3) {
-          for (m in neighbors[[as.character(i)]]) {
+          for (m in neighbors[[i]]) {
             if (t[[m]][j] == 1 | t[[m]][j] == 2) {
               t[[i]][j] <- 2
               change <- TRUE
@@ -250,12 +251,12 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #' }
 getAllNeighbors <- function(D, d, k) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
+  pbapply::pblapply(d, function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
-    if (length(activeLabels)>0) {
+    if (length(activeLabels) > 0) {
       getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
     }
-  }), d)
+  })
 
 }
 
@@ -276,13 +277,13 @@ getAllNeighbors <- function(D, d, k) {
 #' }
 getC <- function(D, d, neighbors, k) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
+  pbapply::pblapply(d, function(i) {
     unlist(lapply(D$labels$index, function(j) {
-      (1/k) * sum(unlist(lapply(neighbors[[as.character(i)]], function(m) {
+      (1/k) * sum(unlist(lapply(neighbors[i], function(m) {
         ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
       })))
     }))
-  }), d)
+  })
 
 }
 
@@ -303,19 +304,19 @@ getC <- function(D, d, neighbors, k) {
 #' }
 getS <- function(D, d, C, minoritary) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
+  pbapply::pblapply(d, function(i) {
     unlist(lapply(D$labels$index, function(j) {
-      if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[as.character(i)]][j - D$measures$num.inputs]<1)) {
-        numerator <- C[[as.character(i)]][j - D$measures$num.inputs]
+      if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[i]][j - D$measures$num.inputs]<1)) {
+        numerator <- C[[i]][j - D$measures$num.inputs]
         denominator <- sum(unlist(lapply(d, function(x) {
-          ifelse(D$dataset[x,j]==minoritary[j - D$measures$num.inputs],C[[as.character(x)]][j - D$measures$num.inputs],0)*ifelse(C[[as.character(x)]][j - D$measures$num.inputs]<1,1,0)
+          ifelse(D$dataset[x,j]==minoritary[j - D$measures$num.inputs],C[[x]][j - D$measures$num.inputs],0)*ifelse(C[[x]][j - D$measures$num.inputs]<1,1,0)
         })))
         numerator/denominator
       } else {
         -1
       }
     }))
-  }), d)
+  })
 
 }
 
@@ -335,9 +336,9 @@ getS <- function(D, d, C, minoritary) {
 #' }
 getW <- function(D, d, S) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
-    sum(S[[as.character(i)]][!S[[as.character(i)]] %in% -1])
-  }), d)
+  pbapply::pblapply(d, function(i) {
+    sum(S[[i]][!S[[i]] %in% -1])
+  })
 
 }
 
@@ -357,9 +358,9 @@ getW <- function(D, d, S) {
 #' }
 getAllReverseNeighbors <- function(d, neighbors, k) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
+  pbapply::pblapply(d, function(i) {
     d[ceiling(which(unlist(neighbors)==i)/k)]
-  }), d)
+  })
 
 }
 
@@ -380,21 +381,21 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 #' }
 getU <- function(D, d, rNeighbors, S) {
 
-  stats::setNames(pbapply::pblapply(d, function(i) {
+  pbapply::pblapply(d, function(i) {
 
     sum(unlist(lapply(D$labels$index, function(j) {
 
-        ifelse(length(rNeighbors[[as.character(i)]]) > 0,
+        ifelse(length(rNeighbors[i]) > 0,
 
-        sum(unlist(lapply(rNeighbors[[as.character(i)]], function(m) {
+        sum(unlist(lapply(rNeighbors[i], function(m) {
 
-          ifelse(S[[as.character(m)]][j - D$measures$num.inputs]==-1,0,ifelse(D$dataset[i,j]==D$dataset[m,j],1,-1)*S[[as.character(m)]][j - D$measures$num.inputs])
+          ifelse(S[[m]][j - D$measures$num.inputs]==-1,0,ifelse(D$dataset[i,j]==D$dataset[m,j],1,-1)*S[[m]][j - D$measures$num.inputs])
 
-        }))) / length(rNeighbors[[as.character(i)]]), 0)
+        }))) / length(rNeighbors[i]), 0)
 
     })))
 
-  }), d)
+  })
 
 }
 
@@ -415,14 +416,14 @@ getU <- function(D, d, rNeighbors, S) {
 getV <- function(d, w, u) {
 
   v <- pbapply::pblapply(d, function(i) {
-         w[[as.character(i)]] + u[[as.character(i)]]
+         w[i] + u[i]
        })
 
   minimum <- min(unlist(v))
 
-  stats::setNames(lapply(v, function(x) {
+  lapply(v, function(x) {
     x - minimum
-  }), d)
+  })
 
 }
 
@@ -562,7 +563,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
         startTime <- Sys.time()
-        neighbors <- getAllNeighbors(D, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), D$measures$num.instances)
+        neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], D$measures$num.instances)
         endTime <- Sys.time()
         print(paste("Time taken (in seconds):",as.numeric(endTime - startTime, units="secs")))
 
