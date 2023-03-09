@@ -29,6 +29,9 @@ resample(
 
 \item{outputDirectory}{Route with the directory where generated ARFF files will be stored. Defaults to the working directory}
 }
+\value{
+Dataframe with times (in seconds) taken in to execute each algorithm
+}
 \description{
 Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files
 }

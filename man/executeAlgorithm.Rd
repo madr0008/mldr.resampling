@@ -21,6 +21,9 @@ executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors)
 
 \item{neighbors}{Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL}
 }
+\value{
+Time (in seconds) taken to execute the algorithm (NULL if no algorithm was executed)
+}
 \description{
 Auxiliary function used by resample. It executes an algorithm, given as a string, and stores the resulting MLD in a arff file
 }
