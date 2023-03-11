@@ -18,11 +18,11 @@
 #' @export
 MLeNN <- function(D, TH=0.5, k=3) {
 
-  majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))))
+  majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1])))
 
   toDelete <- unlist(pbapply::pblapply(majBag, function(x) {
                                 activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                                neighbors <- getNN(x, as.numeric(rownames(D$dataset)), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
+                                neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
                                 numDifferences <- sum(unlist(lapply(neighbors, function(y) {
                                                                adjustedHammingDist(x,y,D) > TH
                                                              })))
