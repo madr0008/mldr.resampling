@@ -554,7 +554,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
           print(paste("Calculating neighbors structures for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
           startTime <- Sys.time()
-          neighbors <- getAllNeighbors(D, as.numeric(rownames(D$dataset[D$dataset$.labelcount > 0,])), D$measures$num.instances)
+          neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], D$measures$num.instances)
           endTime <- Sys.time()
           timeNeighbors <- as.numeric(endTime - startTime, units="secs")
           print(paste("Time taken (in seconds):",timeNeighbors))
