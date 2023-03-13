@@ -513,7 +513,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors) {
 #' @param P Percentage in which the original dataset is increased/decreased, if required by the algorithm(s). Defaults to 25
 #' @param k Number of neighbors taken into account for each instance, if required by the algorithm(s). Defaults to 3
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s). Defaults to 0.5
-#' @param params Dataframe with 4 columns: name of the algorithm, P, k and TH, in order to execute several algorithms with different values for their parameters
+#' @param params Dataframe with 4 columns: name of the algorithm, P, k and TH, in that order, to execute several algorithms with different values for their parameters
 #' @param outputDirectory Route with the directory where generated ARFF files will be stored. Defaults to the working directory
 #'
 #' @return Dataframe with times (in seconds) taken in to execute each algorithm
@@ -528,8 +528,8 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors) {
 #' @export
 resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=getwd()) {
 
-  times = data.frame(matrix(nrow = 0, ncol = 2))
-  colnames(times) = c("algorithm", "time")
+  times <- data.frame(matrix(nrow = 0, ncol = 2))
+  colnames(times) <- c("algorithm", "time")
 
   if (missing(D)) {
 
@@ -550,11 +550,11 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
         neighbors <- NULL
         timeNeighbors <- 0
 
-        if (("MLSOL" %in% params[1] | "MLUL" %in% params[1]) & (sum(ifelse(is.na(table(params[1])["MLSOL"]),0,table(params[1])["MLSOL"]), ifelse(is.na(table(params[1])["MLUL"]),0,table(params[1])["MLUL"])) > 1)) {
+        if (("MLSOL" %in% unlist(params[1]) | "MLUL" %in% unlist(params[1])) & (sum(ifelse(is.na(table(params[1])["MLSOL"]),0,table(params[1])["MLSOL"]), ifelse(is.na(table(params[1])["MLUL"]),0,table(params[1])["MLUL"])) > 1)) {
 
           print(paste("Calculating neighbors structures for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
           startTime <- Sys.time()
-          neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], D$measures$num.instances)
+          neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], max(params[params[,1] %in% c("MLSOL","MLUL"),3]))
           endTime <- Sys.time()
           timeNeighbors <- as.numeric(endTime - startTime, units="secs")
           print(paste("Time taken (in seconds):",timeNeighbors))
@@ -588,7 +588,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
         startTime <- Sys.time()
-        neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], D$measures$num.instances)
+        neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], k)
         endTime <- Sys.time()
         timeNeighbors <- as.numeric(endTime - startTime, units="secs")
         print(paste("Time taken (in seconds):",timeNeighbors))
