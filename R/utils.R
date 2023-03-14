@@ -605,7 +605,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       }
 
-      for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + 10 } #Add neighbors structure generation time
+      for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors } #Add neighbors structure generation time
 
       print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 
