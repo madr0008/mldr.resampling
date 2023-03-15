@@ -50,7 +50,7 @@ MLRkNNOS <- function(D, k) {
       stats::setNames(c(unlist(lapply(D$attributesIndexes, function(j) {
 
           if (D$attributes[[j]] %in% c("numeric", "Date")) {
-            D$dataset[s,j] + (D$dataset[r,j] - D$dataset[s,j])*stats::runif(1, 0, 1) #Numeric attributes. Falta multiplicar por dist euclidea
+            D$dataset[s,j] + (D$dataset[r,j] - D$dataset[s,j])*stats::runif(1, 0, 1) #Numeric attributes
           } else {
             sample(c(D$dataset[s,j], D$dataset[r,j]), size = 1) #Non numeric attributes
           }
