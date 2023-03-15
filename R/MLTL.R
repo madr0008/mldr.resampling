@@ -7,6 +7,7 @@
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param TH threshold for the Hamming Distance in order to consider an instance different to another one.
+#' @param neighbors Structure with instances and neighbors. If it is empty, it will be calculated by the function
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
@@ -15,8 +16,8 @@
 #' MLTL(bibtex, 0.5)
 #' }
 #' @export
-MLTL <- function(D, TH) {
+MLTL <- function(D, TH, neighbors=NULL) {
 
-  mldr.resampling::MLeNN(D, TH, 1)
+  mldr.resampling::MLeNN(D, TH, 1, neighbors)
 
 }

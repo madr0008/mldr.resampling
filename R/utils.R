@@ -438,6 +438,7 @@ getV <- function(d, w, u) {
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)
 #' @param outputDirectory Route with the directory where the generated ARFF file will be stored
 #' @param neighbors Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL
+#' @param neighbors2 Structure with some instances and neighbors in the dataset, useful in MLeNN and MLTL
 #'
 #' @return Time (in seconds) taken to execute the algorithm (NULL if no algorithm was executed)
 #'
@@ -446,7 +447,7 @@ getV <- function(d, w, u) {
 #' library(mldr)
 #' executeAlgorithm(bibtex, "MLSMOTE", k=3)
 #' }
-executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors) {
+executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbors2) {
 
   if (!(a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS", "MLRkNNOS", "MLSMOTE", "MLSOL", "MLUL", "MLeNN", "MLTL", "REMEDIAL"))) {
     print(paste("Error: There is no algorithm named", a))
@@ -476,13 +477,13 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors) {
       name <- paste(D$name, a, "TH", TH, "k", k, sep = "_")
       print(paste("Running",a,"on",D$name,"with TH =",TH,"and k =",k))
       startTime <- Sys.time()
-      d <- f(D, TH, k)
+      d <- f(D, TH, k, neighbors2)
       endTime <- Sys.time()
     } else if (a == "MLTL") {
       name <- paste(D$name, a, "TH", TH, sep = "_")
       print(paste("Running",a,"on",D$name,"with TH =",TH))
       startTime <- Sys.time()
-      d <- f(D, TH)
+      d <- f(D, TH, neighbors2)
       endTime <- Sys.time()
     } else { #REMEDIAL
       name <- a
@@ -549,6 +550,8 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         neighbors <- NULL
         timeNeighbors <- 0
+        neighbors2 <- NULL
+        timeNeighbors2 <- 0
 
         if (("MLSOL" %in% unlist(params[1]) | "MLUL" %in% unlist(params[1])) & (sum(ifelse(is.na(table(params[1])["MLSOL"]),0,table(params[1])["MLSOL"]), ifelse(is.na(table(params[1])["MLUL"]),0,table(params[1])["MLUL"])) > 1)) {
 
@@ -561,9 +564,20 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         }
 
+        if (("MLeNN" %in% unlist(params[1]) | "MLTL" %in% unlist(params[1])) & (sum(ifelse(is.na(table(params[1])["MLeNN"]),0,table(params[1])["MLeNN"]), ifelse(is.na(table(params[1])["MLTL"]),0,table(params[1])["MLTL"])) > 1)) {
+
+          print(paste("Calculating second neighbors structure for dataset", D$name, ". Once this is done, algorithms MLeNN and MLTL will be applied faster"))
+          startTime <- Sys.time()
+          neighbors2 <- getAllNeighbors(D, unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), max(params[params[,1] %in% c("MLSOL","MLUL"),3]))
+          endTime <- Sys.time()
+          timeNeighbors2 <- as.numeric(endTime - startTime, units="secs")
+          print(paste("Time taken (in seconds):",timeNeighbors2))
+
+        }
+
         for(i in 1:nrow(params)) {
 
-          time <- executeAlgorithm(D,params[i,1],params[i,2],params[i,3],params[i,4], neighbors)
+          time <- executeAlgorithm(D,params[i,1],params[i,2],params[i,3],params[i,4], neighbors, neighbors2)
 
           if (!is.null(time)) {
             times[nrow(times) + 1,] <- c(a,time)
@@ -571,7 +585,9 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         }
 
-        for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + 10 } #Add neighbors structure generation time
+        #Add neighbors structure generation time
+        for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors }
+        for (i in rownames(times[times$algorithm %in% c("MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors2 }
 
         print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 
@@ -583,10 +599,12 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       neighbors <- NULL
       timeNeighbors <- 0
+      neighbors2 <- NULL
+      timeNeighbors2 <- 0
 
       if (("MLSOL" %in% algorithms | "MLUL" %in% algorithms) & (sum(ifelse(is.na(table(algorithms)["MLSOL"]),0,table(algorithms)["MLSOL"]), ifelse(is.na(table(algorithms)["MLUL"]),0,table(algorithms)["MLUL"])) > 1)) {
 
-        print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, all the algorithms will be applied faster"))
+        print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, algorithms MLSOL and MLUL will be applied faster"))
         startTime <- Sys.time()
         neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], k)
         endTime <- Sys.time()
@@ -595,9 +613,20 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       }
 
+      if (("MLeNN" %in% algorithms | "MLTL" %in% algorithms) & (sum(ifelse(is.na(table(algorithms)["MLeNN"]),0,table(algorithms)["MLeNN"]), ifelse(is.na(table(algorithms)["MLTL"]),0,table(algorithms)["MLTL"])) > 1)) {
+
+        print(paste("Calculating second neighbors structure for dataset", D$name, ". Once this is done, algorithms MLeNN and MLTL will be applied faster"))
+        startTime <- Sys.time()
+        neighbors2 <- getAllNeighbors(D, unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), k)
+        endTime <- Sys.time()
+        timeNeighbors2 <- as.numeric(endTime - startTime, units="secs")
+        print(paste("Time taken (in seconds):",timeNeighbors2))
+
+      }
+
       for (a in algorithms) {
 
-        time <- executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors)
+        time <- executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors, neighbors2)
 
         if (!is.null(time)) {
           times[nrow(times) + 1,] <- c(a,time)
@@ -605,7 +634,9 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       }
 
-      for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors } #Add neighbors structure generation time
+      #Add neighbors structure generation time
+      for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors }
+      for (i in rownames(times[times$algorithm %in% c("MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors2 }
 
       print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 

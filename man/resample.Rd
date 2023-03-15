@@ -25,7 +25,7 @@ resample(
 
 \item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s). Defaults to 0.5}
 
-\item{params}{Dataframe with 4 columns: name of the algorithm, P, k and TH, in order to execute several algorithms with different values for their parameters}
+\item{params}{Dataframe with 4 columns: name of the algorithm, P, k and TH, in that order, to execute several algorithms with different values for their parameters}
 
 \item{outputDirectory}{Route with the directory where generated ARFF files will be stored. Defaults to the working directory}
 }
