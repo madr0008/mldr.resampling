@@ -45,32 +45,41 @@ LPROS <- function(D, P) {
     }
   }
 
-  #Calculate number of instances to increase, and add them (process minBag from largest to smallest)
-  meanInc <- round(samplesToIncrease/length(minBag)) #Round o ceiling?
-  remainder <- rep(0, length(minBag))
-  aux <- c()
-  for (i in length(minBag):1) {
-    rBag <- min(meanSize - length(labelSetBag[[minBag[i]]]), meanInc)
-    remainder[i] <- meanInc - rBag
-    #Clone instances
-    labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=TRUE)])
-    aux <- c(aux, rep(i, length(labelSetBag[[minBag[i]]])))
-  }
+  if (is.null(minBag)) {
 
-  #Distribute among bags
-  remainder[1] <- round(remainder[1] + samplesToIncrease - meanInc*length(minBag))
-  i <- 1
-  while ((remainder[i] > 0) && (i <= length(remainder))) {
-    x <- sample(aux, size = round(remainder[i]), replace=FALSE)
-    bags <- table(x)
-    for (j in 1:length(bags)) {
-      labelSetBag[[minBag[as.numeric(names(bags)[j])]]] <- c(labelSetBag[[minBag[as.numeric(names(bags)[j])]]], labelSetBag[[minBag[as.numeric(names(bags)[j])]]][sample.int(length(labelSetBag[[minBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)])
+    print("There is no imbalance in terms of labelsets. The output dataset is not changed")
+    D
+
+  } else {
+
+    #Calculate number of instances to increase, and add them (process minBag from largest to smallest)
+    meanInc <- round(samplesToIncrease/length(minBag)) #Round o ceiling?
+    remainder <- rep(0, length(minBag))
+    aux <- c()
+    for (i in length(minBag):1) {
+      rBag <- min(meanSize - length(labelSetBag[[minBag[i]]]), meanInc)
+      remainder[i] <- meanInc - rBag
+      #Clone instances
+      labelSetBag[[minBag[i]]] <- c(labelSetBag[[minBag[i]]], labelSetBag[[minBag[i]]][sample.int(length(labelSetBag[[minBag[i]]]), size=rBag, replace=TRUE)])
+      aux <- c(aux, rep(i, length(labelSetBag[[minBag[i]]])))
     }
-    aux <- vecsets::vsetdiff(aux, x)
-    aux <- aux[(length(labelSetBag[[minBag[i]]]) + 1):length(aux)]
-    i <- i + 1
-  }
 
-  mldr::mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+    #Distribute among bags
+    remainder[1] <- round(remainder[1] + samplesToIncrease - meanInc*length(minBag))
+    i <- 1
+    while ((remainder[i] > 0) && (i <= length(remainder))) {
+      x <- sample(aux, size = round(remainder[i]), replace=FALSE)
+      bags <- table(x)
+      for (j in 1:length(bags)) {
+        labelSetBag[[minBag[as.numeric(names(bags)[j])]]] <- c(labelSetBag[[minBag[as.numeric(names(bags)[j])]]], labelSetBag[[minBag[as.numeric(names(bags)[j])]]][sample.int(length(labelSetBag[[minBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)])
+      }
+      aux <- vecsets::vsetdiff(aux, x)
+      aux <- aux[(length(labelSetBag[[minBag[i]]]) + 1):length(aux)]
+      i <- i + 1
+    }
+
+    mldr::mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+
+  }
 
 }

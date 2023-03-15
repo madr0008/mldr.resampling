@@ -43,32 +43,41 @@ LPRUS <- function(D, P) {
     i <- i - 1
   }
 
-  #Calculate number of instances to delete, and remove them (process majBag from smallest to largest)
-  meanRed <- round(samplesToDelete/length(majBag)) #Round o ceiling?
-  meanSize <- floor(meanSize)
-  remainder <- rep(0, length(majBag))
-  aux <- c()
-  for (i in length(majBag):1) {
-    rBag <- min(length(labelSetBag[[majBag[i]]]) - meanSize, meanRed)
-    remainder[i] <- meanRed - rBag
-    #Delete instances
-    labelSetBag[[majBag[i]]] <- labelSetBag[[majBag[i]]][-sample.int(length(labelSetBag[[majBag[i]]]), size=rBag, replace=FALSE)]
-    aux <- c(aux, rep(i, length(labelSetBag[[majBag[i]]])))
-  }
+  if (is.null(majBag)) {
 
-  #Distribute among bags
-  i <- length(remainder)
-  while ((remainder[i] != 0) && (i >= 1)) {
-    x <- sample(aux, size = round(remainder[i]), replace=FALSE)
-    bags <- table(x)
-    for (j in 1:length(bags)) {
-      labelSetBag[[majBag[as.numeric(names(bags)[j])]]] <- labelSetBag[[majBag[as.numeric(names(bags)[j])]]][-sample.int(length(labelSetBag[[majBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)]
+    print("There is no imbalance in terms of labelsets. The output dataset is not changed")
+    D
+
+  } else {
+
+    #Calculate number of instances to delete, and remove them (process majBag from smallest to largest)
+    meanRed <- round(samplesToDelete/length(majBag)) #Round o ceiling?
+    meanSize <- floor(meanSize)
+    remainder <- rep(0, length(majBag))
+    aux <- c()
+    for (i in length(majBag):1) {
+      rBag <- min(length(labelSetBag[[majBag[i]]]) - meanSize, meanRed)
+      remainder[i] <- meanRed - rBag
+      #Delete instances
+      labelSetBag[[majBag[i]]] <- labelSetBag[[majBag[i]]][-sample.int(length(labelSetBag[[majBag[i]]]), size=rBag, replace=FALSE)]
+      aux <- c(aux, rep(i, length(labelSetBag[[majBag[i]]])))
     }
-    aux <- vecsets::vsetdiff(aux, x)
-    aux <- aux[(length(labelSetBag[[majBag[i]]]) + 1):length(aux)]
-    i <- i - 1
-  }
 
-  mldr::mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+    #Distribute among bags
+    i <- length(remainder)
+    while ((remainder[i] != 0) && (i >= 1)) {
+      x <- sample(aux, size = round(remainder[i]), replace=FALSE)
+      bags <- table(x)
+      for (j in 1:length(bags)) {
+        labelSetBag[[majBag[as.numeric(names(bags)[j])]]] <- labelSetBag[[majBag[as.numeric(names(bags)[j])]]][-sample.int(length(labelSetBag[[majBag[as.numeric(names(bags)[j])]]]), size=bags[[j]], replace=FALSE)]
+      }
+      aux <- vecsets::vsetdiff(aux, x)
+      aux <- aux[(length(labelSetBag[[majBag[i]]]) + 1):length(aux)]
+      i <- i - 1
+    }
+
+    mldr::mldr_from_dataframe(D$dataset[unlist(labelSetBag),], D$labels$index, D$attributes, D$name)
+
+  }
 
 }
