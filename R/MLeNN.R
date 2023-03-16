@@ -19,22 +19,22 @@
 #' @export
 MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL) {
 
-  majBag <- unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1])))
+  majBag <- unique(unlist(mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1])))
 
   toDelete <- ifelse(is.null(neighbors),
 
-                unlist(pbapply::pblapply(majBag, function(x) {
+                unlist(mldrApplyFun2(majBag, function(x) {
                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
                   neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
-                  numDifferences <- sum(unlist(lapply(neighbors, function(y) {
+                  numDifferences <- sum(unlist(mldrApplyFun1(neighbors, function(y) {
                                                  adjustedHammingDist(x,y,D) > TH
                                                })))
                   if (numDifferences >= k/2) { x } #Samples to delete
                 }))
                 ,
-                unlist(pbapply::pblapply(c(1:length(majBag)), function(x) {
+                unlist(mldrApplyFun2(c(1:length(majBag)), function(x) {
                   n <- neighbors[[x]][1:k]
-                  numDifferences <- sum(unlist(lapply(n, function(y) {
+                  numDifferences <- sum(unlist(mldrApplyFun1(n, function(y) {
                     adjustedHammingDist(majBag[[x]],y,D) > TH
                   })))
                   if (numDifferences >= k/2) { x } #Samples to delete

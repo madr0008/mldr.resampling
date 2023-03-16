@@ -24,7 +24,7 @@ MLROS <- function(D, P) {
   minLabels <- D$labels[D$labels$IRLbl > D$measures$meanIR,]$index
 
   #Obtain indexes of instances with each minority label
-  minBag <- lapply(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))
+  minBag <- mldrApplyFun1(minLabels, function(x) as.numeric(rownames(D$dataset[D$dataset[x]==1,])))
 
   #Instance cloning loop
   clonedSamples <- c()
@@ -34,7 +34,7 @@ MLROS <- function(D, P) {
   while ((samplesToClone > 0) && all(canClone)) {
 
     samplesToClone <- samplesToClone - sum(canClone)
-    clonedSamples <- c(clonedSamples, unlist(lapply(c(1:length(minBag)), function(i) {
+    clonedSamples <- c(clonedSamples, unlist(mldrApplyFun1(c(1:length(minBag)), function(i) {
       if (canClone[i]) {
         return(sample(minBag[[i]],1,replace=FALSE))
         canClone[i] <- !(maxCount/D$labels$count[D$labels$index == minLabels[i]] <= D$measures$meanIR)

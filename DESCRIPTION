@@ -11,10 +11,12 @@ Description: Collection of the state of the art multilabel resampling algorithms
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Imports: 
     data.table,
     e1071,
     mldr,
     pbapply,
     vecsets
+Suggests:
+    parallel

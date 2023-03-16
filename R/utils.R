@@ -14,7 +14,7 @@
 #' }
 calculateDistances <- function(sample, rest, label, D) {
 
-  sapply(rest, function(y) {
+  unlist(mldrApplyFun1(rest, function(y) {
     ifelse(y == sample,
            Inf, #In order not to choose its own
            sqrt( #Square root because euclidean distance
@@ -24,18 +24,18 @@ calculateDistances <- function(sample, rest, label, D) {
                ),
                ifelse(sum(D$attributes[1:D$measures$num.inputs]!="numeric") > 0,
                  sum( #For non numeric attributes: Value Difference Measure (VDM)
-                   sapply(D$attributesIndexes[D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
+                   unlist(mldrApplyFun1(D$attributesIndexes[D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
                      table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
                      table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
                      sum(
                        abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
                      )
-                   })
+                   }))
                  ), 0)
              )
            )
     )
-  })
+  }))
 
 }
 
@@ -81,16 +81,16 @@ getNN <- function(sample, rest, label, D, k) {
 newSample <- function(seedInstance, refNeigh, neighbors, D) {
 
   c(
-    lapply(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
+    mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
       ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
              D$dataset[seedInstance,i] + (D$dataset[refNeigh,i] - D$dataset[seedInstance,i])*stats::runif(1, 0, 1), #Numeric attributes
              utils::tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
     }),
-    sapply(lapply(D$dataset[c(seedInstance, neighbors),D$labels$index], sum), function(x) { #Labels
+    unlist(mldrApplyFun1(mldrApplyFun1(D$dataset[c(seedInstance, neighbors),D$labels$index], sum), function(x) { #Labels
       ifelse(x > ((length(neighbors)+1)/2), 1, 0)
     }),
     rep(NA, length(D$dataset) - D$measures$num.attributes) #Other measures like labelcount, SCUMBLE
-  )
+  ))
 
 }
 
@@ -131,8 +131,8 @@ adjustedHammingDist <- function(x,y,D) {
 #' }
 initTypes <- function(C, neighbors, k, minoritary, D, d) {
 
-  t <- pbapply::pblapply(d, function(i) {
-    unlist(lapply(D$labels$index, function(j) {
+  t <- mldrApplyFun2(d, function(i) {
+    unlist(mldrApplyFun1(D$labels$index, function(j) {
       if (D$dataset[i,j] != minoritary[j - D$measures$num.inputs]) {
         5
       } else {
@@ -191,7 +191,7 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
   s <- seedInstance
   r <- refNeigh
 
-  attributes <- as.numeric(unlist(lapply(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
+  attributes <- as.numeric(unlist(mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
     ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
            D$dataset[s,i] + (D$dataset[r,i] - D$dataset[s,i])*stats::runif(1, 0, 1), #Numeric attributes
            sample(c(D$dataset[s,i], D$dataset[r,i]), size = 1)) #Non numeric attributes
@@ -251,7 +251,7 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #' }
 getAllNeighbors <- function(D, d, k) {
 
-  pbapply::pblapply(d, function(i) {
+  mldrApplyFun2(d, function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
     if (length(activeLabels) > 0) {
       getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
@@ -277,9 +277,9 @@ getAllNeighbors <- function(D, d, k) {
 #' }
 getC <- function(D, d, neighbors, k) {
 
-  pbapply::pblapply(d, function(i) {
-    unlist(lapply(D$labels$index, function(j) {
-      (1/k) * sum(unlist(lapply(neighbors[i], function(m) {
+  mldrApplyFun2(d, function(i) {
+    unlist(mldrApplyFun1(D$labels$index, function(j) {
+      (1/k) * sum(unlist(mldrApplyFun1(neighbors[i], function(m) {
         ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
       })))
     }))
@@ -304,11 +304,11 @@ getC <- function(D, d, neighbors, k) {
 #' }
 getS <- function(D, d, C, minoritary) {
 
-  pbapply::pblapply(d, function(i) {
-    unlist(lapply(D$labels$index, function(j) {
+  mldrApplyFun2(d, function(i) {
+    unlist(mldrApplyFun1(D$labels$index, function(j) {
       if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[i]][j - D$measures$num.inputs]<1)) {
         numerator <- C[[i]][j - D$measures$num.inputs]
-        denominator <- sum(unlist(lapply(d, function(x) {
+        denominator <- sum(unlist(mldrApplyFun1(d, function(x) {
           ifelse(D$dataset[x,j]==minoritary[j - D$measures$num.inputs],C[[x]][j - D$measures$num.inputs],0)*ifelse(C[[x]][j - D$measures$num.inputs]<1,1,0)
         })))
         numerator/denominator
@@ -336,7 +336,7 @@ getS <- function(D, d, C, minoritary) {
 #' }
 getW <- function(D, d, S) {
 
-  pbapply::pblapply(d, function(i) {
+  mldrApplyFun2(d, function(i) {
     sum(S[[i]][!S[[i]] %in% -1])
   })
 
@@ -358,7 +358,7 @@ getW <- function(D, d, S) {
 #' }
 getAllReverseNeighbors <- function(d, neighbors, k) {
 
-  pbapply::pblapply(d, function(i) {
+  mldrApplyFun2(d, function(i) {
     d[ceiling(which(unlist(neighbors)==i)/k)]
   })
 
@@ -381,13 +381,13 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 #' }
 getU <- function(D, d, rNeighbors, S) {
 
-  pbapply::pblapply(d, function(i) {
+  mldrApplyFun2(d, function(i) {
 
-    sum(unlist(lapply(D$labels$index, function(j) {
+    sum(unlist(mldrApplyFun1(D$labels$index, function(j) {
 
         ifelse(length(rNeighbors[[i]]) > 0,
 
-        sum(unlist(lapply(rNeighbors[[i]], function(m) {
+        sum(unlist(mldrApplyFun1(rNeighbors[[i]], function(m) {
 
           ifelse(S[[m]][j - D$measures$num.inputs]==-1,0,ifelse(D$dataset[i,j]==D$dataset[m,j],1,-1)*S[[m]][j - D$measures$num.inputs])
 
@@ -415,13 +415,13 @@ getU <- function(D, d, rNeighbors, S) {
 #' }
 getV <- function(d, w, u) {
 
-  v <- pbapply::pblapply(d, function(i) {
+  v <- mldrApplyFun2(d, function(i) {
          w[[i]] + u[[i]]
        })
 
   minimum <- min(unlist(v))
 
-  lapply(v, function(x) {
+  mldrApplyFun1(v, function(x) {
     x - minimum
   })
 
@@ -568,7 +568,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
           print(paste("Calculating second neighbors structure for dataset", D$name, ". Once this is done, algorithms MLeNN and MLTL will be applied faster"))
           startTime <- Sys.time()
-          neighbors2 <- getAllNeighbors(D, unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), max(params[params[,1] %in% c("MLSOL","MLUL"),3]))
+          neighbors2 <- getAllNeighbors(D, unique(unlist(mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), max(params[params[,1] %in% c("MLSOL","MLUL"),3]))
           endTime <- Sys.time()
           timeNeighbors2 <- as.numeric(endTime - startTime, units="secs")
           print(paste("Time taken (in seconds):",timeNeighbors2))
@@ -617,7 +617,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
         print(paste("Calculating second neighbors structure for dataset", D$name, ". Once this is done, algorithms MLeNN and MLTL will be applied faster"))
         startTime <- Sys.time()
-        neighbors2 <- getAllNeighbors(D, unique(unlist(lapply(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), k)
+        neighbors2 <- getAllNeighbors(D, unique(unlist(mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) c(1:D$measures$num.instances)[D$dataset[x]==1]))), k)
         endTime <- Sys.time()
         timeNeighbors2 <- as.numeric(endTime - startTime, units="secs")
         print(paste("Time taken (in seconds):",timeNeighbors2))
