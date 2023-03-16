@@ -27,7 +27,7 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
     neighbors <- getAllNeighbors(D, d, k)
   } else {
     print("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- lapply(neighbors, function(x) { x[1:k+1] })
+    neighbors <- lapply(neighbors, function(x) { x[0:k] })
   }
 
   print("Part 2/3: Calculating auxiliary structures")
