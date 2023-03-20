@@ -699,7 +699,7 @@ setParallel <- function(beParallel) {
     if (requireNamespace("parallel", quietly = TRUE)) {
       setNumCores(parallel::detectCores())
       mldrApplyFun2 <<- parallel::mclapply
-      print(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setCores if you wish to modify it"))
+      print(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
     } else {
       print("You have to install package parallel in order to enable parallel computing")
     }
