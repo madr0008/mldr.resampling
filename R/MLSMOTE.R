@@ -18,7 +18,7 @@
 MLSMOTE <- function(D, k) {
 
   newSamples <- unlist(mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
-                                  minBag <- as.numeric(rownames(D$dataset[D$dataset[x]==1,]))
+                                  minBag <- c(1:D$measures$num.instances)[D$dataset[x]==1]
                                   mldrApplyFun1(minBag, function(y) {
                                     neighbors <- minBag[getNN(y, minBag, x, D, k)]
                                     refNeigh <- sample(neighbors, size=1)
@@ -26,6 +26,6 @@ MLSMOTE <- function(D, k) {
                                   }, mc.cores=numCores)
                                 }, mc.cores=numCores), recursive = FALSE)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
 
 }
