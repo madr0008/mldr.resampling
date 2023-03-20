@@ -16,7 +16,7 @@
 #' @export
 MLRkNNOS <- function(D, k) {
 
-  minoritary <- unlist(mldrApplyFun1(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
+  minoritary <- unlist(mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0) }, mc.cores=numCores))
   numeric <- names(D$attributes[D$attributes == "numeric" | D$attributes == "numeric" ])
   factors <- names(D$attributes[D$attributes[D$attributesIndexes] != "numeric"])
 
@@ -30,15 +30,15 @@ MLRkNNOS <- function(D, k) {
 
     neighbors <- mldrApplyFun1(min, function(i) {
       min[getNN(i, min, l, D, k)]
-    })
+    }, mc.cores=numCores)
 
     rNeighbors <- mldrApplyFun1(min, function(i) {
       min[ceiling(which(unlist(neighbors)==i)/k)]
-    })
+    }, mc.cores=numCores)
 
     augMin <- min[lengths(rNeighbors) > 0]
 
-    rNeighbors <- rNeighbors[mldrApplyFun1(rNeighbors,length)>0]
+    rNeighbors <- rNeighbors[mldrApplyFun1(rNeighbors,length, mc.cores=numCores)>0]
 
     q <- sample.int(length(augMin),N,replace=TRUE)
 
@@ -55,15 +55,15 @@ MLRkNNOS <- function(D, k) {
             sample(c(D$dataset[s,j], D$dataset[r,j]), size = 1) #Non numeric attributes
           }
 
-      })), minoritary[l-D$measures$num.inputs]), names(D$attributes[c(D$attributesIndexes,l)]))
+      }, mc.cores=numCores)), minoritary[l-D$measures$num.inputs]), names(D$attributes[c(D$attributesIndexes,l)]))
 
-    })))
+    }, mc.cores=numCores)))
 
     aux[numeric] <- as.numeric(unlist(aux[numeric]))
-    aux[factors] <- mldrApplyFun1(factors, function(i) { factor(aux[[i]], levels=unique(D$dataset[[i]])) })
+    aux[factors] <- mldrApplyFun1(factors, function(i) { factor(aux[[i]], levels=unique(D$dataset[[i]])) }, mc.cores=numCores)
     aux
 
-  })
+  }, mc.cores=numCores)
 
   print("Part 2/3: Training SVMs")
 
@@ -71,7 +71,7 @@ MLRkNNOS <- function(D, k) {
   M <- mldrApplyFun2(D$labels$index, function(l) {
 
     d <- D$dataset[,c(D$attributesIndexes,l)]
-    d[factors] <- mldrApplyFun1(factors, function(i) { factor(d[[i]], levels=unique(D$dataset[[i]])) })
+    d[factors] <- mldrApplyFun1(factors, function(i) { factor(d[[i]], levels=unique(D$dataset[[i]])) }, mc.cores=numCores)
 
     O <- rbind(D$dataset[,c(D$attributesIndexes,l)], S[[l-D$measures$num.inputs]])
     names(O) <- c(names(D$attributes[D$attributesIndexes]),"Class")
@@ -79,7 +79,7 @@ MLRkNNOS <- function(D, k) {
 
     e1071::svm(Class ~ ., data = O)
 
-  })
+  }, mc.cores=numCores)
 
   print("Part 3/3: Predicting labels")
 
@@ -91,12 +91,12 @@ MLRkNNOS <- function(D, k) {
 
       as.numeric(stats::predict(M[[l - D$measures$num.inputs]],(S[[j - D$measures$num.inputs]])[D$attributesIndexes]))
 
-    }), names(D$dataset)[D$labels$index[!D$labels$index %in% j]]))
+    }, mc.cores=numCores), names(D$dataset)[D$labels$index[!D$labels$index %in% j]]))
 
 
-  }), fill=TRUE, use.names=TRUE)), fill=TRUE, use.names=TRUE))
+  }, mc.cores=numCores), fill=TRUE, use.names=TRUE)), fill=TRUE, use.names=TRUE))
 
-  toRet[] <- mldrApplyFun1(toRet, function(x) if (is.factor(x)) as.character(x) else {x})
+  toRet[] <- mldrApplyFun1(toRet, function(x) { if (is.factor(x)) as.character(x) else {x} }, mc.cores=numCores)
 
   mldr::mldr_from_dataframe(toRet, D$labels$index, D$attributes, D$name)
 

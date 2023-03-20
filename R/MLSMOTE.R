@@ -23,9 +23,9 @@ MLSMOTE <- function(D, k) {
                                     neighbors <- minBag[getNN(y, minBag, x, D, k)]
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
-                                  })
-                                }), recursive = FALSE)
+                                  }, mc.cores=numCores)
+                                }, mc.cores=numCores), recursive = FALSE)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
 
 }

@@ -18,7 +18,7 @@
 #' @export
 MLSOL <- function(D, P, k, neighbors=NULL) {
 
-  minoritary <- unlist(mldrApplyFun1(D$labels$freq, function(x) ifelse(x<0.5,1,0)))
+  minoritary <- unlist(mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0) }, mc.cores=numCores))
 
   d <- c(1:D$measures$num.instances)[D$dataset$.labelcount > 0]
 
@@ -27,7 +27,7 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
     neighbors <- getAllNeighbors(D, d, k)
   } else {
     print("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- mldrApplyFun1(neighbors, function(x) { x[0:k] })
+    neighbors <- mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=numCores)
   }
 
   print("Part 2/3: Calculating auxiliary structures")
@@ -48,8 +48,8 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
 
   newSamples <- mldrApplyFun2(seedInstances, function(i) {
     generateInstanceMLSOL(i, sample(neighbors[[i]], size=1), t, D)
-  })
+  }, mc.cores=numCores)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$dataset)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
 
 }
