@@ -89,7 +89,6 @@ newSample <- function(seedInstance, refNeigh, neighbors, D) {
     unlist(mldrApplyFun1(mldrApplyFun1(D$dataset[c(seedInstance, neighbors),D$labels$index], sum, mc.cores=numCores), function(x) { #Labels
       ifelse(x > ((length(neighbors)+1)/2), 1, 0)
     }, mc.cores=numCores),
-    rep(NA, length(D$dataset) - D$measures$num.attributes) #Other measures like labelcount, SCUMBLE
   ))
 
 }
@@ -231,7 +230,7 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
     }
   }
 
-  c(attributes, labels, rep(NA, length(D$dataset) - D$measures$num.attributes))
+  c(attributes, labels)
 
 }
 
