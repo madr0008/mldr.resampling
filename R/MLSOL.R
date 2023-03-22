@@ -50,6 +50,6 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
     generateInstanceMLSOL(i, sample(neighbors[[i]], size=1), t, D)
   }, mc.cores=numCores)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset, mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=numCores)), D$labels$index, D$attributes, D$name)
 
 }
