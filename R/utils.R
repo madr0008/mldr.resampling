@@ -23,8 +23,8 @@ calculateDistances <- function(sample, rest, label, D) {
                  (D$dataset[sample,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]] - D$dataset[y,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]])^2
                ),
                ifelse(sum(D$attributes[1:D$measures$num.inputs]!="numeric") > 0,
-                 sum( #For non numeric attributes: Value Difference Measure (VDM)
-                   unlist(mldrApplyFun1(D$attributesIndexes[D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
+                 sum( #For non numeric attributes: Value Difference Metric (VDM)
+                   unlist(mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
                      table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
                      table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
                      sum(
