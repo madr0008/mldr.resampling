@@ -18,7 +18,7 @@
 #' @export
 MLUL <- function(D, P, k, neighbors=NULL) {
 
-  minoritary <- unlist(mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0)} , mc.cores=numCores))
+  minoritary <- unlist(.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0)} , mc.cores=.numCores))
 
   d <- c(1:D$measures$num.instances)[D$dataset$.labelcount > 0]
 
@@ -27,7 +27,7 @@ MLUL <- function(D, P, k, neighbors=NULL) {
     neighbors <- getAllNeighbors(D, d, k)
   } else {
     print("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=numCores)
+    neighbors <- .mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=.numCores)
   }
 
   print("Part 2/2: Calculating auxiliary structures and removing instances")
