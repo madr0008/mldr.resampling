@@ -24,7 +24,7 @@ MLUL <- function(D, P, k, neighbors=NULL) {
 
   if (is.null(neighbors)) {
     print("Part 1/2: Calculating neighbors structure")
-    neighbors <- getAllNeighbors(D, d, k)
+    neighbors <- .mldrApplyFun1(getAllNeighbors(D, d), function(x) { x[1:k+1] }, mc.cores=.numCores)
   } else {
     print("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
     neighbors <- .mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=.numCores)

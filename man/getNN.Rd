@@ -4,7 +4,7 @@
 \alias{getNN}
 \title{Auxiliary function used to compute the neighbors of an instance}
 \usage{
-getNN(sample, rest, label, D, k)
+getNN(sample, rest, label, D)
 }
 \arguments{
 \item{sample}{Index of the sample whose neighbors we want to know}
@@ -14,8 +14,6 @@ getNN(sample, rest, label, D, k)
 \item{label}{Label that must be active, in order to calculate the distances}
 
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
-
-\item{k}{Number of neighbors to be returned}
 }
 \value{
 A vector with the indexes inside rest of the neighbors
@@ -26,6 +24,6 @@ Auxiliary function used to compute the neighbors of an instance
 \examples{
 \dontrun{
 library(mldr)
-getNN(25,c(75,65,89,23),300,bibtex,3)
+getNN(25,c(75,65,89,23),300,bibtex)
 }
 }

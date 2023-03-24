@@ -4,14 +4,12 @@
 \alias{getAllNeighbors}
 \title{Auxiliary function used by MLSOL and MLUL. Computes the kNN of every instance in a dataset}
 \usage{
-getAllNeighbors(D, d, k)
+getAllNeighbors(D, d)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
 \item{d}{Vector with the instances of the dataset which have one or more label active (ideally, all of them)}
-
-\item{k}{Number of neighbors to be included for every instance}
 }
 \value{
 A list of vectors with the indexes of the neighbors for each instance
@@ -22,6 +20,6 @@ Auxiliary function used by MLSOL and MLUL. Computes the kNN of every instance in
 \examples{
 \dontrun{
 library(mldr)
-getAllNeighbors(bibtex, 3)
+getAllNeighbors(bibtex, c(1:D$measures$num.instances))
 }
 }

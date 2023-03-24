@@ -20,7 +20,7 @@ MLSMOTE <- function(D, k) {
   newSamples <- unlist(.mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
                                   minBag <- c(1:D$measures$num.instances)[D$dataset[x]==1]
                                   .mldrApplyFun1(minBag, function(y) {
-                                    neighbors <- minBag[getNN(y, minBag, x, D, k)]
+                                    neighbors <- minBag[getNN(y, minBag, x, D)[1:k+1]]
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
                                   }, mc.cores=.numCores)

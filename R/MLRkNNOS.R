@@ -29,7 +29,7 @@ MLRkNNOS <- function(D, k) {
     N <- D$measures$num.instances - 2*length(min)
 
     neighbors <- .mldrApplyFun1(min, function(i) {
-      min[getNN(i, min, l, D, k)]
+      min[getNN(i, min, l, D)[1:k+1]]
     }, mc.cores=.numCores)
 
     rNeighbors <- .mldrApplyFun1(min, function(i) {

@@ -25,7 +25,7 @@ MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL) {
 
                 unlist(.mldrApplyFun2(majBag, function(x) {
                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                  neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, k)
+                  neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D)[1:k+1]
                   numDifferences <- sum(unlist(.mldrApplyFun1(neighbors, function(y) {
                                                  adjustedHammingDist(x,y,D) > TH
                                                }, mc.cores=.numCores)))
