@@ -580,6 +580,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
           neighbors <- .mldrApplyFun1(neighbors, function(x) { x[1:(max(params[params[,1] %in% c("MLSOL","MLUL"),3])+1)] }, mc.cores=.numCores)
           endTime <- Sys.time()
           timeNeighbors <- as.numeric(endTime - startTime, units="secs")
+          print(paste("Time taken (in seconds):",timeNeighbors))
 
         }
 
@@ -617,6 +618,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
         neighbors <- .mldrApplyFun1(neighbors, function(x) { x[1:k+1] }, mc.cores=.numCores)
         endTime <- Sys.time()
         timeNeighbors <- as.numeric(endTime - startTime, units="secs")
+        print(paste("Time taken (in seconds):",timeNeighbors))
 
       }
 
