@@ -129,9 +129,9 @@ adjustedHammingDist <- function(x,y,D) {
 #' }
 initTypes <- function(C, neighbors, k, minoritary, D, d) {
 
-  t <- .mldrApplyFun2(d, function(i) {
+  t <- .mldrApplyFun2(c(1:length(d)), function(i) {
     unlist(.mldrApplyFun1(D$labels$index, function(j) {
-      if (D$dataset[i,j] != minoritary[j - D$measures$num.inputs]) {
+      if (D$dataset[d[i],j] != minoritary[j - D$measures$num.inputs]) {
         5
       } else {
         if (C[[i]][j - D$measures$num.inputs] < 1/3) {
@@ -150,7 +150,7 @@ initTypes <- function(C, neighbors, k, minoritary, D, d) {
   change <- TRUE
   while (change) {
     change <- FALSE
-    for (i in d) {
+    for (i in c(1:length(d))) {
       for (j in 1:D$measures$num.labels) {
         if (t[[i]][j] == 3) {
           for (m in neighbors[[i]]) {
@@ -323,14 +323,14 @@ getC <- function(D, d, neighbors, k) {
 #' }
 getS <- function(D, d, C, minoritary) {
 
-  .mldrApplyFun2(d, function(i) {
+  .mldrApplyFun2(c(1:length(d)), function(i) {
     unlist(.mldrApplyFun1(D$labels$index, function(j) {
-      if ((D$dataset[i,j]==minoritary[j - D$measures$num.inputs]) & (C[[i]][j - D$measures$num.inputs]<1)) {
+      if ((D$dataset[d[i],j]==minoritary[j - D$measures$num.inputs]) & (C[[i]][j - D$measures$num.inputs]<1)) {
         numerator <- C[[i]][j - D$measures$num.inputs]
-        denominator <- sum(unlist(.mldrApplyFun1(d, function(x) {
-          ifelse(D$dataset[x,j]==minoritary[j - D$measures$num.inputs],C[[x]][j - D$measures$num.inputs],0)*ifelse(C[[x]][j - D$measures$num.inputs]<1,1,0)
+        denominator <- sum(unlist(.mldrApplyFun1(c(1:length(d)), function(x) {
+          ifelse(D$dataset[d[x],j]==minoritary[j - D$measures$num.inputs],C[[x]][j - D$measures$num.inputs],0)*ifelse(C[[x]][j - D$measures$num.inputs]<1,1,0)
         }, mc.cores=.numCores)))
-        numerator/denominator
+        ifelse(denominator!=0,numerator/denominator,-1)
       } else {
         -1
       }
@@ -344,18 +344,17 @@ getS <- function(D, d, C, minoritary) {
 #' Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
-#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
 #' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
 #'
 #' @return A vector of weights to be considered when oversampling for each instance
 #' @examples
 #' \dontrun{
 #' library(mldr)
-#' getW(bibtex, rownames(bibtex), S)
+#' getW(bibtex, S)
 #' }
-getW <- function(D, d, S) {
+getW <- function(D, S) {
 
-  .mldrApplyFun2(d, function(i) {
+  .mldrApplyFun2(c(1:length(S)), function(i) {
     sum(S[[i]][!S[[i]] %in% -1])
   }, mc.cores=.numCores)
 
@@ -378,7 +377,7 @@ getW <- function(D, d, S) {
 getAllReverseNeighbors <- function(d, neighbors, k) {
 
   .mldrApplyFun2(d, function(i) {
-    d[ceiling(which(unlist(neighbors)==i)/k)]
+    ceiling(which(unlist(neighbors)==i)/k)
   }, mc.cores=.numCores)
 
 }
@@ -400,7 +399,7 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 #' }
 getU <- function(D, d, rNeighbors, S) {
 
-  .mldrApplyFun2(d, function(i) {
+  .mldrApplyFun2(c(1:length(d)), function(i) {
 
     sum(unlist(.mldrApplyFun1(D$labels$index, function(j) {
 
@@ -422,7 +421,6 @@ getU <- function(D, d, rNeighbors, S) {
 
 #' Auxiliary function used by MLUL. It calculates, for each instance, how important it is in the dataset
 #'
-#' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
 #' @param w List of weights for each instance
 #' @param u List of influences in reverse neighbors for each instance
 #'
@@ -432,9 +430,9 @@ getU <- function(D, d, rNeighbors, S) {
 #' library(mldr)
 #' getV(rownames(bibtex), w, u)
 #' }
-getV <- function(d, w, u) {
+getV <- function(w, u) {
 
-  v <- .mldrApplyFun2(d, function(i) {
+  v <- .mldrApplyFun2(c(1:length(w)), function(i) {
          w[[i]] + u[[i]]
        }, mc.cores=.numCores)
 

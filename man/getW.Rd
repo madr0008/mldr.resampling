@@ -4,12 +4,10 @@
 \alias{getW}
 \title{Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label}
 \usage{
-getW(D, d, S)
+getW(D, S)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
-
-\item{d}{Vector with the instances of the dataset which have one or more label active (ideally, all of them)}
 
 \item{S}{Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance}
 }
@@ -22,6 +20,6 @@ Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggrega
 \examples{
 \dontrun{
 library(mldr)
-getW(bibtex, rownames(bibtex), S)
+getW(bibtex, S)
 }
 }

@@ -38,11 +38,11 @@ MLUL <- function(D, P, k, neighbors=NULL) {
 
   S <- getS(D, d, C, minoritary)
 
-  w <- getW(D, d, S)
+  w <- getW(D, S)
 
   u <- getU(D, d, rNeighbors, S)
 
-  v <- getV(d, w, u)
+  v <- getV(w, u)
 
   retNum <- (length(d)/100) * (100 - P)
 

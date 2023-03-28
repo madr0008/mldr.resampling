@@ -4,11 +4,9 @@
 \alias{getV}
 \title{Auxiliary function used by MLUL. It calculates, for each instance, how important it is in the dataset}
 \usage{
-getV(d, w, u)
+getV(w, u)
 }
 \arguments{
-\item{d}{Vector with the instances of the dataset which have one or more label active (ideally, all of them)}
-
 \item{w}{List of weights for each instance}
 
 \item{u}{List of influences in reverse neighbors for each instance}

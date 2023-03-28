@@ -36,7 +36,7 @@ MLSOL <- function(D, P, k, neighbors=NULL) {
 
   S <- getS(D, d, C, minoritary)
 
-  w <- getW(D, d, S)
+  w <- getW(D, S)
 
   t <- initTypes(C, neighbors, k, minoritary, D, d)
 
