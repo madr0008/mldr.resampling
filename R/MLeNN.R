@@ -9,6 +9,7 @@
 #' @param TH threshold for the Hamming Distance in order to consider an instance different to another one. Defaults to 0.5.
 #' @param k number of nearest neighbours to check for each instance. Defaults to 3.
 #' @param neighbors Structure with instances and neighbors. If it is empty, it will be calculated by the function
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
 #' @examples
@@ -17,7 +18,7 @@
 #' MLeNN(bibtex, 0.5, 3)
 #' }
 #' @export
-MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL) {
+MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL, tableVDM=NULL) {
 
   majBag <- unique(unlist(.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=.numCores)))
 
@@ -25,7 +26,7 @@ MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL) {
 
                 unlist(.mldrApplyFun2(majBag, function(x) {
                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
-                  neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D)[1:k+1]
+                  neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, tableVDM)[1:k+1]
                   numDifferences <- sum(unlist(.mldrApplyFun1(neighbors, function(y) {
                                                  adjustedHammingDist(x,y,D) > TH
                                                }, mc.cores=.numCores)))

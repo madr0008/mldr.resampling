@@ -6,6 +6,7 @@
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param k Number of neighbors to be considered when creating a synthetic instance
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -14,7 +15,7 @@
 #' MLRkNNOS(bibtex, 3)
 #' }
 #' @export
-MLRkNNOS <- function(D, k) {
+MLRkNNOS <- function(D, k, tableVDM=NULL) {
 
   minoritary <- unlist(.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0) }, mc.cores=.numCores))
   numeric <- names(D$attributes[D$attributes == "numeric" | D$attributes == "numeric" ])
@@ -29,7 +30,7 @@ MLRkNNOS <- function(D, k) {
     N <- D$measures$num.instances - 2*length(min)
 
     neighbors <- .mldrApplyFun1(min, function(i) {
-      min[getNN(i, min, l, D)[1:k+1]]
+      min[getNN(i, min, l, D, tableVDM)[1:k+1]]
     }, mc.cores=.numCores)
 
     rNeighbors <- .mldrApplyFun1(min, function(i) {

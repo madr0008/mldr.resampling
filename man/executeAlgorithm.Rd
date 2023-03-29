@@ -4,7 +4,17 @@
 \alias{executeAlgorithm}
 \title{Auxiliary function used by resample. It executes an algorithm, given as a string, and stores the resulting MLD in a arff file}
 \usage{
-executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors, neighbors2)
+executeAlgorithm(
+  D,
+  a,
+  P,
+  k,
+  TH,
+  outputDirectory,
+  neighbors,
+  neighbors2,
+  tableVDM
+)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
@@ -22,6 +32,8 @@ executeAlgorithm(D, a, P, k, TH, outputDirectory, neighbors, neighbors2)
 \item{neighbors}{Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL}
 
 \item{neighbors2}{Structure with some instances and neighbors in the dataset, useful in MLeNN and MLTL}
+
+\item{tableVDM}{Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower}
 }
 \value{
 Time (in seconds) taken to execute the algorithm (NULL if no algorithm was executed)

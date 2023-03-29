@@ -7,6 +7,7 @@
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param k Number of neighbors to be considered when creating a synthetic instance
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -15,12 +16,12 @@
 #' MLSMOTE(bibtex, 3)
 #' }
 #' @export
-MLSMOTE <- function(D, k) {
+MLSMOTE <- function(D, k, tableVDM=NULL) {
 
   newSamples <- unlist(.mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
                                   minBag <- c(1:D$measures$num.instances)[D$dataset[x]==1]
                                   .mldrApplyFun1(minBag, function(y) {
-                                    neighbors <- minBag[getNN(y, minBag, x, D)[1:k+1]]
+                                    neighbors <- minBag[getNN(y, minBag, x, D, tableVDM)[1:k+1]]
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
                                   }, mc.cores=.numCores)
