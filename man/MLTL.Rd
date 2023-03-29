@@ -7,7 +7,7 @@
 Rodolfo M. Pereira, Yandre M.G. Costa, and Carlos N. Silla Jr. MLTL: A multi-label approach for the Tomek Link undersampling algorithm. Neurocomputing, 383:95–105, 2020. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2019.11.076
 }
 \usage{
-MLTL(D, TH, neighbors = NULL)
+MLTL(D, TH, neighbors = NULL, tableVDM = NULL)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
@@ -15,6 +15,8 @@ MLTL(D, TH, neighbors = NULL)
 \item{TH}{threshold for the Hamming Distance in order to consider an instance different to another one.}
 
 \item{neighbors}{Structure with instances and neighbors. If it is empty, it will be calculated by the function}
+
+\item{tableVDM}{Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower}
 }
 \value{
 An mldr object containing the preprocessed multilabel dataset

@@ -7,12 +7,14 @@
 Sadhukhan, P., & Palit, S. (2019). Reverse-nearest neighborhood based oversampling for imbalanced, multi-label datasets. Pattern Recognition Letters, 125, 813-820
 }
 \usage{
-MLRkNNOS(D, k)
+MLRkNNOS(D, k, tableVDM = NULL)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
 \item{k}{Number of neighbors to be considered when creating a synthetic instance}
+
+\item{tableVDM}{Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower}
 }
 \value{
 A mld object containing the preprocessed multilabel dataset

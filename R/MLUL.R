@@ -8,6 +8,7 @@
 #' @param P Percentage in which the original dataset is decreased
 #' @param k Number of neighbors to be considered when computing the neighbors of an instance
 #' @param neighbors Structure with all instances and neighbors in the dataset. If it is empty, it will be calculated by the function
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
@@ -16,7 +17,7 @@
 #' MLUL(bibtex, 3)
 #' }
 #' @export
-MLUL <- function(D, P, k, neighbors=NULL) {
+MLUL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
   minoritary <- unlist(.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0)} , mc.cores=.numCores))
 
@@ -24,7 +25,7 @@ MLUL <- function(D, P, k, neighbors=NULL) {
 
   if (is.null(neighbors)) {
     print("Part 1/2: Calculating neighbors structure")
-    neighbors <- .mldrApplyFun1(getAllNeighbors(D, d), function(x) { x[1:k+1] }, mc.cores=.numCores)
+    neighbors <- .mldrApplyFun1(getAllNeighbors(D, d, tableVDM), function(x) { x[1:k+1] }, mc.cores=.numCores)
   } else {
     print("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
     neighbors <- .mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=.numCores)
