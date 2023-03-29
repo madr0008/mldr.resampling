@@ -2,9 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{calculateDistances}
 \alias{calculateDistances}
-\title{Auxiliary function used to calculate the distances between an instance and the ones with a specific active label}
+\title{Auxiliary function used to calculate the distances between an instance and the ones with a specific active label. Euclidean distance is calculated for numeric attributes, and VDM for non numeric ones.}
 \usage{
-calculateDistances(sample, rest, label, D)
+calculateDistances(sample, rest, label, D, tableVDM = NULL)
 }
 \arguments{
 \item{sample}{Index of the sample whose distances to other samples we want to know}
@@ -14,12 +14,14 @@ calculateDistances(sample, rest, label, D)
 \item{label}{Label that must be active}
 
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
+
+\item{tableVDM}{Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower}
 }
 \value{
 A list with the distance to the rest of samples
 }
 \description{
-Auxiliary function used to calculate the distances between an instance and the ones with a specific active label
+Auxiliary function used to calculate the distances between an instance and the ones with a specific active label. Euclidean distance is calculated for numeric attributes, and VDM for non numeric ones.
 }
 \examples{
 \dontrun{

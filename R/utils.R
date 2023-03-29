@@ -1,9 +1,10 @@
-#' Auxiliary function used to calculate the distances between an instance and the ones with a specific active label
+#' Auxiliary function used to calculate the distances between an instance and the ones with a specific active label. Euclidean distance is calculated for numeric attributes, and VDM for non numeric ones.
 #'
 #' @param sample Index of the sample whose distances to other samples we want to know
 #' @param rest Indexes of the samples to which we will calculate the distance
 #' @param label Label that must be active
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A list with the distance to the rest of samples
 #'
@@ -12,26 +13,15 @@
 #' library(mldr)
 #' calculateDistances(25,c(75,65,89,23),300,bibtex)
 #' }
-calculateDistances <- function(sample, rest, label, D) {
+calculateDistances <- function(sample, rest, label, D, tableVDM=NULL) {
 
   unlist(.mldrApplyFun1(rest, function(y) {
     ifelse(y == sample,
            Inf, #In order not to choose its own
            sqrt( #Square root because euclidean distance
              sum( #Summing distances between numeric and non numeric attributes
-               sum( #For numeric attributes: square of the difference
-                 (D$dataset[sample,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]] - D$dataset[y,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]])^2
-               ),
-               ifelse(sum(D$attributes[1:D$measures$num.inputs]!="numeric") > 0,
-                 sum( #For non numeric attributes: Value Difference Metric (VDM)
-                   unlist(.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
-                     table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
-                     table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
-                     sum(
-                       abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
-                     )
-                   }, mc.cores=.numCores))
-                 ), 0)
+               sum((D$dataset[sample,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]] - D$dataset[y,D$attributesIndexes[D$attributes[1:D$measures$num.inputs]=="numeric"]])^2), #For numeric attributes: square of the difference
+               ifelse(sum(D$attributes[1:D$measures$num.inputs]!="numeric") > 0, vdm(D,sample,y,label,tableVDM), 0) #For non numeric attributes: Value Difference Metric (VDM)
              )
            )
     )
@@ -41,6 +31,92 @@ calculateDistances <- function(sample, rest, label, D) {
 
 
 
+#' Auxiliary function used to calculate the Value Difference Metric (VDM) between two instances considering their non numeric attributes
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param sample Index of the first sample
+#' @param y Index of the second sample
+#' @param label Label that will be considered in calculations
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
+#'
+#' @return A value for the distance
+#'
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' vdm(bibtex,25,75,30)
+#' }
+vdm <- function(D, sample, y, label, tableVDM=NULL) {
+
+  if (is.null(tableVDM)) {
+
+    sum(
+      unlist(.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
+        table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
+        table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
+        sum(
+          abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
+        )
+      }, mc.cores=.numCores))
+    )
+
+  } else {
+
+    sum( #For non numeric attributes: Value Difference Metric (VDM)
+      unlist(.mldrApplyFun1(tableVDM$attribute, function(x) {
+        table1 <- (tableVDM[tableVDM$attribute==x,]$tablePerLabel[[1]][[match(D$dataset[sample,x],names(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)))]][[label-D$measures$num.inputs]])/(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)[[D$dataset[sample,x]]])
+        table2 <- (tableVDM[tableVDM$attribute==x,]$tablePerLabel[[1]][[match(D$dataset[y,x],names(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)))]][[label-D$measures$num.inputs]])/(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)[[D$dataset[y,x]]])
+        sum(
+          abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
+        )
+      }, mc.cores=.numCores))
+    )
+
+  }
+
+
+
+}
+
+
+
+#' Auxiliary function used to calculate an auxiliary table to make VDM calculation faster
+#'
+#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#'
+#' @return A dataframe with tables, useful for VDM calculation
+#'
+#' @examples
+#' \dontrun{
+#' library(mldr)
+#' calculateTableVDM(bibtex)
+#' }
+calculateTableVDM <- function(D) {
+
+  attribute <- D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"]
+  df <- data.frame(attribute)
+
+  df$generalTable <- .mldrApplyFun1(attribute, function(x) { table(D$dataset[x]) },mc.cores=.numCores)
+
+  df$tablePerLabel <- .mldrApplyFun2(attribute, function(x) {
+
+  .mldrApplyFun1(unlist(unname(unique(D$dataset[x]))), function(y) {
+
+    .mldrApplyFun1(D$labels$index, function(l) {
+
+      table(D$dataset[D$dataset[x]==y,l])
+
+      }, mc.cores=.numCores)
+
+    }, mc.cores=.numCores)
+
+  }, mc.cores=.numCores)
+
+  df
+
+}
+
+
 
 #' Auxiliary function used to compute the neighbors of an instance
 #'
@@ -48,6 +124,7 @@ calculateDistances <- function(sample, rest, label, D) {
 #' @param rest Indexes of the samples among which we will search
 #' @param label Label that must be active, in order to calculate the distances
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A vector with the indexes inside rest of the neighbors
 #'
@@ -56,9 +133,9 @@ calculateDistances <- function(sample, rest, label, D) {
 #' library(mldr)
 #' getNN(25,c(75,65,89,23),300,bibtex)
 #' }
-getNN <- function(sample, rest, label, D) {
+getNN <- function(sample, rest, label, D, tableVDM=NULL) {
 
-  order(calculateDistances(sample, rest, label, D))
+  order(calculateDistances(sample, rest, label, D, tableVDM))
 
 }
 
@@ -239,6 +316,7 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
+#' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A list of vectors with the indexes of the neighbors for each instance
 #' @examples
@@ -246,12 +324,12 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #' library(mldr)
 #' getAllNeighbors(bibtex, c(1:D$measures$num.instances))
 #' }
-getAllNeighbors <- function(D, d) {
+getAllNeighbors <- function(D, d, tableVDM=NULL) {
 
   .mldrApplyFun2(d, function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
     if (length(activeLabels) > 0) {
-      getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D)
+      getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, tableVDM)
     }
   }, mc.cores=.numCores)
 
