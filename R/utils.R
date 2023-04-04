@@ -266,15 +266,25 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
   s <- seedInstance
   r <- refNeigh
 
-  attributes <- as.numeric(unlist(.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
+  attributes <- .mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
     ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
            D$dataset[s,i] + (D$dataset[r,i] - D$dataset[s,i])*stats::runif(1, 0, 1), #Numeric attributes
            sample(c(D$dataset[s,i], D$dataset[r,i]), size = 1)) #Non numeric attributes
-  }, mc.cores=.numCores)))
+  }, mc.cores=.numCores)
 
   #Calculate distances between attributes
-  d_s <- sum((attributes - as.numeric(unlist(D$dataset[s,D$attributesIndexes[1:D$measures$num.inputs]])))^2)
-  d_r <- sum((attributes - as.numeric(unlist(D$dataset[r,D$attributesIndexes[1:D$measures$num.inputs]])))^2)
+  numericAttributes <- D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs] %in% c("numeric", "Date")]
+  categoricAttributes <- D$attributesIndexes[1:D$measures$num.inputs][!(D$attributes[1:D$measures$num.inputs] %in% c("numeric", "Date"))]
+
+  d_s <- sum(
+           ifelse(length(numericAttributes) > 0, sum(attributes[numericAttributes] - D$dataset[s,numericAttributes])^2, 0),
+           sum(unlist(.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[s,j], 0, 1) })))
+         )
+
+  d_r <- sum(
+    ifelse(length(numericAttributes) > 0, sum(attributes[numericAttributes] - D$dataset[r,numericAttributes])^2, 0),
+    sum(unlist(.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[r,j], 0, 1) })))
+  )
 
   cd <- d_s / (d_s + d_r)
 
