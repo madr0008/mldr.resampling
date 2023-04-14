@@ -3,7 +3,7 @@
 #' @description This function implements the ML-ROS algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
 #' whose aim is to identify instances with minoritary labels, and randomly clone them.
 #'
-#' @source Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163:3–16, 2015. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2014.08.091
+#' @source Charte, F., Rivera, A. J., del Jesus, M. J., & Herrera, F. (2015). Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163, 3-16.
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param P Percentage in which the original dataset is increased

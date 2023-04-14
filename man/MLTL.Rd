@@ -4,7 +4,7 @@
 \alias{MLTL}
 \title{Multilabel approach for the Tomek Link undersampling algorithm (MLTL)}
 \source{
-Rodolfo M. Pereira, Yandre M.G. Costa, and Carlos N. Silla Jr. MLTL: A multi-label approach for the Tomek Link undersampling algorithm. Neurocomputing, 383:95–105, 2020. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2019.11.076
+Pereira, R. M., Costa, Y. M., & Silla Jr, C. N. (2020). MLTL: A multi-label approach for the Tomek Link undersampling algorithm. Neurocomputing, 383, 95-105.
 }
 \usage{
 MLTL(D, TH, neighbors = NULL, tableVDM = NULL)

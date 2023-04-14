@@ -4,7 +4,7 @@
 \alias{MLSMOTE}
 \title{Synthetic oversampling of multilabel instances (MLSMOTE)}
 \source{
-Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. MLSMOTE: Approaching imbalanced multilabel learning through synthetic instance generation. Knowledge-Based Systems, 39:385–397, 2015. ISSN 0950-7051. doi:https://doi.org/10.1016/j.knosys.2015.07.019
+Charte, F., Rivera, A. J., del Jesus, M. J., & Herrera, F. (2015). MLSMOTE: Approaching imbalanced multilabel learning through synthetic instance generation. Knowledge-Based Systems, 89, 385-397.
 }
 \usage{
 MLSMOTE(D, k, tableVDM = NULL)

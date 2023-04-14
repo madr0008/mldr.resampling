@@ -4,7 +4,7 @@
 \alias{LPRUS}
 \title{Randomly deletes instances with majoritary labelsets}
 \source{
-Francisco Charte, Antonio J. Rivera, María J. del Jesus, and Francisco Herrera. Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163:3–16, 2015. ISSN 0925-2312. doi:https://doi.org/10.1016/j.neucom.2014.08.091
+Charte, F., Rivera, A. J., del Jesus, M. J., & Herrera, F. (2015). Addressing imbalance in multilabel classification: Measures and random resampling algorithms. Neurocomputing, 163, 3-16.
 }
 \usage{
 LPRUS(D, P)
