@@ -613,7 +613,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
 
 
 
-#' Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files
+#' Interface function of the package. It executes one or several algorithms, given as strings, and stores the resulting MLDs in arff files
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param algorithms String, or string vector, with the name(s) of the algorithm(s) to be applied.

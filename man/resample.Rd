@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{resample}
 \alias{resample}
-\title{Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files}
+\title{Interface function of the package. It executes one or several algorithms, given as strings, and stores the resulting MLDs in arff files}
 \usage{
 resample(
   D,
@@ -33,7 +33,7 @@ resample(
 Dataframe with times (in seconds) taken in to execute each algorithm
 }
 \description{
-Interface function of the package. It executes one or several, given as a strings, and stores the resulting MLDs in arff files
+Interface function of the package. It executes one or several algorithms, given as strings, and stores the resulting MLDs in arff files
 }
 \examples{
 \dontrun{
