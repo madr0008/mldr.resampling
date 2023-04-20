@@ -531,7 +531,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
 #' @param k Number of neighbors taken into account for each instance, if required by the algorithm(s). Defaults to 3
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one, if required by the algorithm(s). Defaults to 0.5
 #' @param params Dataframe with 4 columns: name of the algorithm, P, k and TH, in that order, to execute several algorithms with different values for their parameters
-#' @param outputDirectory Route with the directory where generated ARFF files will be stored. Defaults to the working directory
+#' @param outputDirectory Route with the directory where generated ARFF files will be stored. Defaults to a temporary directory
 #'
 #' @return Dataframe with times (in seconds) taken in to execute each algorithm
 #'
@@ -539,7 +539,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
 #' library(mldr)
 #' library(mldr.resampling)
 #' resample(birds, "LPROS", P=25)
-#' resample(birds, c("LPROS", "LPRUS"), P=30, outputDirectory=)
+#' resample(birds, c("LPROS", "LPRUS"), P=30)
 #' @export
 resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=tempdir()) {
 

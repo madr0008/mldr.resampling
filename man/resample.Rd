@@ -39,5 +39,5 @@ Interface function of the package. It executes one or several algorithms, given 
 library(mldr)
 library(mldr.resampling)
 resample(birds, "LPROS", P=25)
-resample(birds, c("LPROS", "LPRUS"), P=30, outputDirectory=)
+resample(birds, c("LPROS", "LPRUS"), P=30)
 }
