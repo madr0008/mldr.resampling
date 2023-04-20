@@ -23,9 +23,3 @@ A value for the distance
 \description{
 Auxiliary function used to calculate the Value Difference Metric (VDM) between two instances considering their non numeric attributes
 }
-\examples{
-\dontrun{
-library(mldr)
-vdm(bibtex,25,75,30)
-}
-}

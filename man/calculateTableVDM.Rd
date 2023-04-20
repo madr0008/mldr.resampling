@@ -15,9 +15,3 @@ A dataframe with tables, useful for VDM calculation
 \description{
 Auxiliary function used to calculate an auxiliary table to make VDM calculation faster
 }
-\examples{
-\dontrun{
-library(mldr)
-calculateTableVDM(bibtex)
-}
-}

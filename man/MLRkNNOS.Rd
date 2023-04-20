@@ -22,9 +22,3 @@ A mld object containing the preprocessed multilabel dataset
 \description{
 This function implements an algorithm that uses the concept of reverse nearest neighbors, in order to create new instances for each label. Then, several radial SVMs, one for each label, are trained in order to predict each label of the synthetic instances.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLRkNNOS(bibtex, 3)
-}
-}

@@ -17,9 +17,3 @@ A list with the values of importance of each instance in the dataset
 \description{
 Auxiliary function used by MLUL. It calculates, for each instance, how important it is in the dataset
 }
-\examples{
-\dontrun{
-library(mldr)
-getV(rownames(bibtex), w, u)
-}
-}

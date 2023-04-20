@@ -22,8 +22,7 @@ This function implements the ML-RUS algorithm. It is a preprocessing algorithm f
 whose aim is to identify instances with majoritary labels, and randomly delete them from the original dataset.
 }
 \examples{
-\dontrun{
 library(mldr)
-MLRUS(bibtex, 25)
-}
+MLRUS(birds, 25)
+
 }

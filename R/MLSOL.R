@@ -11,27 +11,23 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' MLSOL(bibtex, 3)
-#' }
+#'
 #' @export
 MLSOL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
-  minoritary <- unlist(.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0) }, mc.cores=.numCores))
+  minoritary <- unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0) }, mc.cores=mldr.resampling.env$.numCores))
 
   d <- c(1:D$measures$num.instances)[D$dataset$.labelcount > 0]
 
   if (is.null(neighbors)) {
-    print("Part 1/3: Calculating neighbors structure")
-    neighbors <- .mldrApplyFun1(getAllNeighbors(D, d, tableVDM), function(x) { x[1:k+1] }, mc.cores=.numCores)
+    message("Part 1/3: Calculating neighbors structure")
+    neighbors <- mldr.resampling.env$.mldrApplyFun1(getAllNeighbors(D, d, tableVDM), function(x) { x[1:k+1] }, mc.cores=mldr.resampling.env$.numCores)
   } else {
-    print("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- .mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=.numCores)
+    message("Part 1/3: Neighbors were already calculated. That just saved us a lot of time!")
+    neighbors <- mldr.resampling.env$.mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=mldr.resampling.env$.numCores)
   }
 
-  print("Part 2/3: Calculating auxiliary structures")
+  message("Part 2/3: Calculating auxiliary structures")
 
   C <- getC(D, d, neighbors, k)
 
@@ -45,12 +41,12 @@ MLSOL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
   seedInstances <- sample(d, size=genNum, replace=TRUE, prob=w)
 
-  print("Part 3/3: Generating new instances")
+  message("Part 3/3: Generating new instances")
 
-  newSamples <- .mldrApplyFun2(seedInstances, function(i) {
+  newSamples <- mldr.resampling.env$.mldrApplyFun2(seedInstances, function(i) {
     generateInstanceMLSOL(i, sample(neighbors[[i]], size=1), t, D)
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], .mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=.numCores)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldr.resampling.env$.mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=mldr.resampling.env$.numCores)), D$labels$index, D$attributes, D$name)
 
 }

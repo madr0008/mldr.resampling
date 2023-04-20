@@ -21,9 +21,3 @@ A list of values of influence for each instance with respect to its reverse neig
 \description{
 Auxiliary function used by MLUL. It computes the influence of each instance with respect to its reverse neighbors
 }
-\examples{
-\dontrun{
-library(mldr)
-getU(bibtex, rownames(bibtex), rNeighbors, S)
-}
-}

@@ -11,27 +11,23 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' MLUL(bibtex, 3)
-#' }
+#'
 #' @export
 MLUL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
-  minoritary <- unlist(.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0)} , mc.cores=.numCores))
+  minoritary <- unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$freq, function(x) { ifelse(x<0.5,1,0)} , mc.cores=mldr.resampling.env$.numCores))
 
   d <- c(1:D$measures$num.instances)[D$dataset$.labelcount > 0]
 
   if (is.null(neighbors)) {
-    print("Part 1/2: Calculating neighbors structure")
-    neighbors <- .mldrApplyFun1(getAllNeighbors(D, d, tableVDM), function(x) { x[1:k+1] }, mc.cores=.numCores)
+    message("Part 1/2: Calculating neighbors structure")
+    neighbors <- mldr.resampling.env$.mldrApplyFun1(getAllNeighbors(D, d, tableVDM), function(x) { x[1:k+1] }, mc.cores=mldr.resampling.env$.numCores)
   } else {
-    print("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
-    neighbors <- .mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=.numCores)
+    message("Part 1/2: Neighbors were already calculated. That just saved us a lot of time!")
+    neighbors <- mldr.resampling.env$.mldrApplyFun1(neighbors, function(x) { x[0:k] }, mc.cores=mldr.resampling.env$.numCores)
   }
 
-  print("Part 2/2: Calculating auxiliary structures and removing instances")
+  message("Part 2/2: Calculating auxiliary structures and removing instances")
 
   rNeighbors <- getAllReverseNeighbors(d, neighbors, k)
 

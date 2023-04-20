@@ -10,23 +10,19 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' MLSMOTE(bibtex, 3)
-#' }
+#'
 #' @export
 MLSMOTE <- function(D, k, tableVDM=NULL) {
 
-  newSamples <- unlist(.mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
+  newSamples <- unlist(mldr.resampling.env$.mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
                                   minBag <- c(1:D$measures$num.instances)[D$dataset[x]==1]
-                                  .mldrApplyFun1(minBag, function(y) {
+                                  mldr.resampling.env$.mldrApplyFun1(minBag, function(y) {
                                     neighbors <- ifelse(length(minBag) < k, minBag[getNN(y, minBag, x, D, tableVDM)], minBag[getNN(y, minBag, x, D, tableVDM)[1:k+1]])
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
-                                  }, mc.cores=.numCores)
-                                }, mc.cores=.numCores), recursive = FALSE)
+                                  }, mc.cores=mldr.resampling.env$.numCores)
+                                }, mc.cores=mldr.resampling.env$.numCores), recursive = FALSE)
 
-  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], .mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=.numCores)), D$labels$index, D$attributes, D$name)
+  mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldr.resampling.env$.mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=mldr.resampling.env$.numCores)), D$labels$index, D$attributes, D$name)
 
 }

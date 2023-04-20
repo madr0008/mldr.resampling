@@ -23,9 +23,3 @@ A mld object containing the preprocessed multilabel dataset
 This function implements the MLSMOTE algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
 whose aim is to identify instances with minoritary labels, and generate synthetic instances based on their neighbor instances.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLSMOTE(bibtex, 3)
-}
-}

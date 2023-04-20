@@ -21,9 +21,3 @@ A structure with the proportion of neighbors having an opposite class with respe
 \description{
 Auxiliary function used by MLSOL and MLUL. For each instance in the dataset, we compute, for each label, the proportion of neighbors having an opposite class with respect to the proper instance
 }
-\examples{
-\dontrun{
-library(mldr)
-getC(bibtex, rownames(bibtex), neighbors, 3)
-}
-}

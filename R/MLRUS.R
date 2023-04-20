@@ -10,10 +10,9 @@
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
-#' \dontrun{
 #' library(mldr)
-#' MLRUS(bibtex, 25)
-#' }
+#' MLRUS(birds, 25)
+#'
 #' @export
 MLRUS <- function(D, P) {
 

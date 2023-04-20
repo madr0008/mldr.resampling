@@ -13,7 +13,6 @@ The number of cores available for parallel computing
 Get the number of cores available for parallel computing
 }
 \examples{
-\dontrun{
 getNumCores()
-}
+
 }

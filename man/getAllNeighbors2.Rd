@@ -19,9 +19,3 @@ A list of vectors with the indexes of the neighbors for each instance
 \description{
 Auxiliary function used by MLeNN and MLTL. Gets the kNN of every instance in a dataset, when compared to some of the rest
 }
-\examples{
-\dontrun{
-library(mldr)
-getAllNeighbors2(neighbors, c(1:D$measures$num.instances), 3)
-}
-}

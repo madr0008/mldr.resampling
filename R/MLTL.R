@@ -11,11 +11,7 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' MLTL(bibtex, 0.5)
-#' }
+#'
 #' @export
 MLTL <- function(D, TH, neighbors=NULL, tableVDM=NULL) {
 

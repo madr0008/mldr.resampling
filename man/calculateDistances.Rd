@@ -23,9 +23,3 @@ A list with the distance to the rest of samples
 \description{
 Auxiliary function used to calculate the distances between an instance and the ones with a specific active label. Euclidean distance is calculated for numeric attributes, and VDM for non numeric ones.
 }
-\examples{
-\dontrun{
-library(mldr)
-calculateDistances(25,c(75,65,89,23),300,bibtex)
-}
-}

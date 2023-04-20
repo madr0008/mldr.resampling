@@ -11,7 +11,7 @@ resample(
   k = 3,
   TH = 0.5,
   params,
-  outputDirectory = getwd()
+  outputDirectory = tempdir()
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ resample(
 
 \item{params}{Dataframe with 4 columns: name of the algorithm, P, k and TH, in that order, to execute several algorithms with different values for their parameters}
 
-\item{outputDirectory}{Route with the directory where generated ARFF files will be stored. Defaults to the working directory}
+\item{outputDirectory}{Route with the directory where generated ARFF files will be stored. Defaults to a temporary directory}
 }
 \value{
 Dataframe with times (in seconds) taken in to execute each algorithm
@@ -36,10 +36,8 @@ Dataframe with times (in seconds) taken in to execute each algorithm
 Interface function of the package. It executes one or several algorithms, given as strings, and stores the resulting MLDs in arff files
 }
 \examples{
-\dontrun{
 library(mldr)
-resample(bibtex, "MLSMOTE", k=3)
-resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
-resample(bibtex, params)
-}
+library(mldr.resampling)
+resample(birds, "LPROS", P=25)
+resample(birds, c("LPROS", "LPRUS"), P=30, outputDirectory=)
 }

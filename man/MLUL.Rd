@@ -26,9 +26,3 @@ A mld object containing the preprocessed multilabel dataset
 \description{
 This function implements the MLUL algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets, which applies undersampling, removing difficult instances according to their neighbors.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLUL(bibtex, 3)
-}
-}

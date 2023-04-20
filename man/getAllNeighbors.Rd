@@ -19,9 +19,3 @@ A list of vectors with the indexes of the neighbors for each instance
 \description{
 Auxiliary function used by MLSOL and MLUL. Computes the kNN of every instance in a dataset
 }
-\examples{
-\dontrun{
-library(mldr)
-getAllNeighbors(bibtex, c(1:D$measures$num.instances))
-}
-}
