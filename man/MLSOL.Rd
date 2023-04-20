@@ -26,9 +26,3 @@ A mld object containing the preprocessed multilabel dataset
 \description{
 This function implements the MLSOL algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets, which applies oversampling on difficult regions of the instance space, in order to help classifiers distinguish labels.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLSOL(bibtex, 3)
-}
-}

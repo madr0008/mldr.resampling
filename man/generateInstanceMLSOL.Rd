@@ -21,9 +21,3 @@ A synthetic sample derived from the one passed as a parameter and its neighbors
 \description{
 Auxiliary function used by MLSOL. Creates a synthetic sample based on two other samples, taking into account their types
 }
-\examples{
-\dontrun{
-library(mldr)
-generateInstanceMLSOL(25,28,c(1,3),bibtex)
-}
-}

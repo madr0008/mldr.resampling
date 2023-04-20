@@ -17,9 +17,3 @@ A vector of weights to be considered when oversampling for each instance
 \description{
 Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label
 }
-\examples{
-\dontrun{
-library(mldr)
-getW(bibtex, S)
-}
-}

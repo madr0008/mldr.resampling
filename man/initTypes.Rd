@@ -25,9 +25,3 @@ A synthetic sample derived from the one passed as a parameter and its neighbors
 \description{
 Auxiliary function used by MLSOL. Categorizes each pair instance-label of the dataset with a type
 }
-\examples{
-\dontrun{
-library(mldr)
-initTypes(C,c(34,65,121),3,bibtex)
-}
-}

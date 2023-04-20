@@ -21,9 +21,3 @@ A structure with the proportion of neighbors having an opposite class with respe
 \description{
 Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of C, taking into account the global class imbalance
 }
-\examples{
-\dontrun{
-library(mldr)
-getS(bibtex, rownames(bibtex), C, rep(1, bibtex$measures$num.labels))
-}
-}

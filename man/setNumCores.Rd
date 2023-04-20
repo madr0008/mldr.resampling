@@ -9,11 +9,14 @@ setNumCores(n)
 \arguments{
 \item{n}{The new value for the number of cores}
 }
+\value{
+No return value, called in order to change the number of cores
+}
 \description{
 Set the number of cores available for parallel computing
 }
 \examples{
-\dontrun{
+\donttest{
 setNumCores(8)
 }
 }

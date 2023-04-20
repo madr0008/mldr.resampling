@@ -19,9 +19,3 @@ A list of vectors with the indexes of the reverse nearest neighbors of every ins
 \description{
 Auxiliary function used by MLUL. For each instance in the dataset, given the neighbors structure, we compute its reverse nearest neighbors
 }
-\examples{
-\dontrun{
-library(mldr)
-getAllReverseNeighbors(rownames(bibtex), neighbors, 3)
-}
-}

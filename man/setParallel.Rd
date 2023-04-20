@@ -9,11 +9,13 @@ setParallel(beParallel)
 \arguments{
 \item{beParallel}{A boolean indicating if parallel computing is to be enabled (TRUE) or disabled (FALSE)}
 }
+\value{
+No return value, called in order to enable parallel computing
+}
 \description{
 Enable/Disable parallel computing
 }
 \examples{
-\dontrun{
 setParallel(TRUE)
-}
+
 }

@@ -23,9 +23,3 @@ A vector with the indexes inside rest of the neighbors
 \description{
 Auxiliary function used to compute the neighbors of an instance
 }
-\examples{
-\dontrun{
-library(mldr)
-getNN(25,c(75,65,89,23),300,bibtex)
-}
-}

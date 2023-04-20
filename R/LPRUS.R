@@ -10,10 +10,9 @@
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #' @examples
-#' \dontrun{
 #' library(mldr)
-#' LPRUS(bibtex, 25)
-#' }
+#' LPRUS(birds, 25)
+#'
 #' @export
 LPRUS <- function(D, P) {
 
@@ -45,7 +44,7 @@ LPRUS <- function(D, P) {
 
   if (is.null(majBag)) {
 
-    print("There is no imbalance in terms of labelsets. The output dataset is not changed")
+    message("There is no imbalance in terms of labelsets. The output dataset is not changed")
     D
 
   } else {

@@ -27,9 +27,3 @@ An mldr object containing the preprocessed multilabel dataset
 This function implements the MLeNN algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets,
 whose aim is to identify instances with majoritary labels, and remove its neihgbors which are too different to them, in terms of active labels.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLeNN(bibtex, 0.5, 3)
-}
-}

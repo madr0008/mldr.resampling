@@ -12,34 +12,30 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return An mldr object containing the preprocessed multilabel dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' MLeNN(bibtex, 0.5, 3)
-#' }
+#'
 #' @export
 MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL, tableVDM=NULL) {
 
-  majBag <- unique(unlist(.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=.numCores)))
+  majBag <- unique(unlist(mldr.resampling.env$.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=mldr.resampling.env$mldr.resampling.env$.numCores)))
 
   toDelete <- ifelse(is.null(neighbors),
 
-                unlist(.mldrApplyFun2(majBag, function(x) {
+                unlist(mldr.resampling.env$.mldrApplyFun2(majBag, function(x) {
                   activeLabels <- D$labels[which(D$dataset[x,D$labels$index] %in% 1),1]
                   neighbors <- getNN(x, c(1:D$measures$num.instances), ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, tableVDM)[1:k+1]
-                  numDifferences <- sum(unlist(.mldrApplyFun1(neighbors, function(y) {
+                  numDifferences <- sum(unlist(mldr.resampling.env$.mldrApplyFun1(neighbors, function(y) {
                                                  adjustedHammingDist(x,y,D) > TH
-                                               }, mc.cores=.numCores)))
+                                               }, mc.cores=mldr.resampling.env$.numCores)))
                   if (numDifferences >= k/2) { x } #Samples to delete
-                }, mc.cores=.numCores))
+                }, mc.cores=mldr.resampling.env$.numCores))
                 ,
-                unlist(.mldrApplyFun2(c(1:length(majBag)), function(x) {
+                unlist(mldr.resampling.env$.mldrApplyFun2(c(1:length(majBag)), function(x) {
                   n <- neighbors[[x]][1:k]
-                  numDifferences <- sum(unlist(.mldrApplyFun1(n, function(y) {
+                  numDifferences <- sum(unlist(mldr.resampling.env$.mldrApplyFun1(n, function(y) {
                     adjustedHammingDist(majBag[[x]],y,D) > TH
-                  }, mc.cores=.numCores)))
+                  }, mc.cores=mldr.resampling.env$.numCores)))
                   if (numDifferences >= k/2) { x } #Samples to delete
-                }, mc.cores=.numCores))
+                }, mc.cores=mldr.resampling.env$.numCores))
 
               )
 

@@ -25,9 +25,3 @@ An mldr object containing the preprocessed multilabel dataset
 This function implements the MLTL algorithm. It is a preprocessing algorithm for imbalanced multilabel datasets, whose aim is to identify
 tomek links (majoritary instances with a very different neighbor), and remove them. It's like MLeNN, with the number of neighbors being 1.
 }
-\examples{
-\dontrun{
-library(mldr)
-MLTL(bibtex, 0.5)
-}
-}

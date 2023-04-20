@@ -1,17 +1,20 @@
+mldr.resampling.env <- new.env(parent=emptyenv())
+
+
 .onAttach <- function(...) {
   packageStartupMessage("Enter setParallel(TRUE) to enable parallel computing")
 }
 
 
 .onLoad <- function(...) {
-  .numCores <<- 1
-  .mldrApplyFun1 <<- function(x, l, mc.cores) { lapply(x,l) }
-  .mldrApplyFun2 <<- function(x, l, mc.cores) { pbapply::pblapply(x,l) }
+
+  assign('.numCores', 1, mldr.resampling.env)
+  assign('.mldrApplyFun1', function(x, l, mc.cores) { lapply(x,l) }, mldr.resampling.env)
+  assign('.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
+
 }
 
 
 .onUnload <- function(...) {
-  rm(.mldrApplyFun1)
-  rm(.mldrApplyFun2)
-  rm(.numCores)
+  rm(mldr.resampling.env)
 }

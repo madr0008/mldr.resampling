@@ -7,15 +7,9 @@
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A list with the distance to the rest of samples
-#'
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' calculateDistances(25,c(75,65,89,23),300,bibtex)
-#' }
 calculateDistances <- function(sample, rest, label, D, tableVDM=NULL) {
 
-  unlist(.mldrApplyFun1(rest, function(y) {
+  unlist(mldr.resampling.env$.mldrApplyFun1(rest, function(y) {
     ifelse(y == sample,
            Inf, #In order not to choose its own
            sqrt( #Square root because euclidean distance
@@ -25,7 +19,7 @@ calculateDistances <- function(sample, rest, label, D, tableVDM=NULL) {
              )
            )
     )
-  }, mc.cores=.numCores))
+  }, mc.cores=mldr.resampling.env$.numCores))
 
 }
 
@@ -40,36 +34,30 @@ calculateDistances <- function(sample, rest, label, D, tableVDM=NULL) {
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A value for the distance
-#'
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' vdm(bibtex,25,75,30)
-#' }
 vdm <- function(D, sample, y, label, tableVDM=NULL) {
 
   if (is.null(tableVDM)) {
 
     sum(
-      unlist(.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
+      unlist(mldr.resampling.env$.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"], function(x) {
         table1 <- table((D$dataset[D$dataset[x] == D$dataset[sample,x],])[label])/(table(D$dataset[x])[[D$dataset[sample,x]]])
         table2 <- table((D$dataset[D$dataset[x] == D$dataset[y,x],])[label])/(table(D$dataset[x])[[D$dataset[y,x]]])
         sum(
           abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
         )
-      }, mc.cores=.numCores))
+      }, mc.cores=mldr.resampling.env$.numCores))
     )
 
   } else {
 
     sum( #For non numeric attributes: Value Difference Metric (VDM)
-      unlist(.mldrApplyFun1(tableVDM$attribute, function(x) {
+      unlist(mldr.resampling.env$.mldrApplyFun1(tableVDM$attribute, function(x) {
         table1 <- (tableVDM[tableVDM$attribute==x,]$tablePerLabel[[1]][[match(D$dataset[sample,x],names(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)))]][[label-D$measures$num.inputs]])/(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)[[D$dataset[sample,x]]])
         table2 <- (tableVDM[tableVDM$attribute==x,]$tablePerLabel[[1]][[match(D$dataset[y,x],names(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)))]][[label-D$measures$num.inputs]])/(unlist(tableVDM[tableVDM$attribute==x,]$generalTable)[[D$dataset[y,x]]])
         sum(
           abs(ifelse(length(table1 == 1), ifelse(names(table1) == "0", stats::setNames(c(table1, 0), c("0","1")), stats::setNames(c(0, table1), c("0","1"))), table1) - ifelse(length(table2 == 1), ifelse(names(table2) == "0", stats::setNames(c(table2, 0), c("0","1")), stats::setNames(c(0, table2), c("0","1"))), table2))
         )
-      }, mc.cores=.numCores))
+      }, mc.cores=mldr.resampling.env$.numCores))
     )
 
   }
@@ -85,32 +73,26 @@ vdm <- function(D, sample, y, label, tableVDM=NULL) {
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #'
 #' @return A dataframe with tables, useful for VDM calculation
-#'
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' calculateTableVDM(bibtex)
-#' }
 calculateTableVDM <- function(D) {
 
   attribute <- D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs]!="numeric"]
   df <- data.frame(attribute)
 
-  df$generalTable <- .mldrApplyFun1(attribute, function(x) { table(D$dataset[x]) },mc.cores=.numCores)
+  df$generalTable <- mldr.resampling.env$.mldrApplyFun1(attribute, function(x) { table(D$dataset[x]) },mc.cores=mldr.resampling.env$.numCores)
 
-  df$tablePerLabel <- .mldrApplyFun2(attribute, function(x) {
+  df$tablePerLabel <- mldr.resampling.env$.mldrApplyFun2(attribute, function(x) {
 
-  .mldrApplyFun1(unlist(unname(unique(D$dataset[x]))), function(y) {
+  mldr.resampling.env$.mldrApplyFun1(unlist(unname(unique(D$dataset[x]))), function(y) {
 
-    .mldrApplyFun1(D$labels$index, function(l) {
+    mldr.resampling.env$.mldrApplyFun1(D$labels$index, function(l) {
 
       table(D$dataset[D$dataset[x]==y,l])
 
-      }, mc.cores=.numCores)
+      }, mc.cores=mldr.resampling.env$.numCores)
 
-    }, mc.cores=.numCores)
+    }, mc.cores=mldr.resampling.env$.numCores)
 
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
   df
 
@@ -127,12 +109,6 @@ calculateTableVDM <- function(D) {
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A vector with the indexes inside rest of the neighbors
-#'
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getNN(25,c(75,65,89,23),300,bibtex)
-#' }
 getNN <- function(sample, rest, label, D, tableVDM=NULL) {
 
   order(calculateDistances(sample, rest, label, D, tableVDM))
@@ -149,22 +125,17 @@ getNN <- function(sample, rest, label, D, tableVDM=NULL) {
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #'
 #' @return A synthetic sample derived from the one passed as a parameter and its neighbors
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' newSample(25,28,c(15,28,62),bibtex)
-#' }
 newSample <- function(seedInstance, refNeigh, neighbors, D) {
 
   c(
-    .mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
+    mldr.resampling.env$.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
       ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
              D$dataset[seedInstance,i] + (D$dataset[refNeigh,i] - D$dataset[seedInstance,i])*stats::runif(1, 0, 1), #Numeric attributes
              utils::tail(names(sort(table(D$dataset[neighbors, i]))), 1)) #Non numeric attributes
-    }, mc.cores=.numCores),
-    unlist(.mldrApplyFun1(.mldrApplyFun1(D$dataset[c(seedInstance, neighbors),D$labels$index], sum, mc.cores=.numCores), function(x) { #Labels
+    }, mc.cores=mldr.resampling.env$.numCores),
+    unlist(mldr.resampling.env$.mldrApplyFun1(mldr.resampling.env$.mldrApplyFun1(D$dataset[c(seedInstance, neighbors),D$labels$index], sum, mc.cores=mldr.resampling.env$.numCores), function(x) { #Labels
       ifelse(x > ((length(neighbors)+1)/2), 1, 0)
-    }, mc.cores=.numCores),
+    }, mc.cores=mldr.resampling.env$.numCores),
   ))
 
 }
@@ -178,11 +149,6 @@ newSample <- function(seedInstance, refNeigh, neighbors, D) {
 #' @param D mld \code{mldr} object in which the instances are located
 #'
 #' @return The Hamming Distance between the instances
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' adjustedHammingDist(1,2,bibtex)
-#' }
 adjustedHammingDist <- function(x,y,D) {
   length(which(D$dataset[x,D$labels$index] != D$dataset[y,D$labels$index])) / (sum(D$dataset[x,D$labels$index]) + sum(D$dataset[y,D$labels$index]))
 }
@@ -199,15 +165,10 @@ adjustedHammingDist <- function(x,y,D) {
 #' @param d Vector with the instances of the dataset which have one or more label active (ideally, all of them)
 #'
 #' @return A synthetic sample derived from the one passed as a parameter and its neighbors
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' initTypes(C,c(34,65,121),3,bibtex)
-#' }
 initTypes <- function(C, neighbors, k, minoritary, D, d) {
 
-  t <- .mldrApplyFun2(c(1:length(d)), function(i) {
-    unlist(.mldrApplyFun1(D$labels$index, function(j) {
+  t <- mldr.resampling.env$.mldrApplyFun2(c(1:length(d)), function(i) {
+    unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$index, function(j) {
       if (D$dataset[d[i],j] != minoritary[j - D$measures$num.inputs]) {
         5
       } else {
@@ -221,8 +182,8 @@ initTypes <- function(C, neighbors, k, minoritary, D, d) {
           4
         }
       }
-    }, mc.cores=.numCores))
-  }, mc.cores=.numCores)
+    }, mc.cores=mldr.resampling.env$.numCores))
+  }, mc.cores=mldr.resampling.env$.numCores)
 
   change <- TRUE
   while (change) {
@@ -256,21 +217,16 @@ initTypes <- function(C, neighbors, k, minoritary, D, d) {
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #'
 #' @return A synthetic sample derived from the one passed as a parameter and its neighbors
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' generateInstanceMLSOL(25,28,c(1,3),bibtex)
-#' }
 generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 
   s <- seedInstance
   r <- refNeigh
 
-  attributes <- .mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
+  attributes <- mldr.resampling.env$.mldrApplyFun1(D$attributesIndexes[1:D$measures$num.inputs], function(i) { #Attributes
     ifelse(D$attributes[[i]] %in% c("numeric", "Date"),
            D$dataset[s,i] + (D$dataset[r,i] - D$dataset[s,i])*stats::runif(1, 0, 1), #Numeric attributes
            sample(c(D$dataset[s,i], D$dataset[r,i]), size = 1)) #Non numeric attributes
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
   #Calculate distances between attributes
   numericAttributes <- D$attributesIndexes[1:D$measures$num.inputs][D$attributes[1:D$measures$num.inputs] %in% c("numeric", "Date")]
@@ -278,12 +234,12 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 
   d_s <- sum(
            ifelse(length(numericAttributes) > 0, sum(attributes[numericAttributes] - D$dataset[s,numericAttributes])^2, 0),
-           sum(unlist(.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[s,j], 0, 1) })))
+           sum(unlist(mldr.resampling.env$.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[s,j], 0, 1) })))
          )
 
   d_r <- sum(
     ifelse(length(numericAttributes) > 0, sum(attributes[numericAttributes] - D$dataset[r,numericAttributes])^2, 0),
-    sum(unlist(.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[r,j], 0, 1) })))
+    sum(unlist(mldr.resampling.env$.mldrApplyFun1(categoricAttributes, function(j) {ifelse(attributes[[j]] == D$dataset[r,j], 0, 1) })))
   )
 
   cd <- d_s / (d_s + d_r)
@@ -329,19 +285,14 @@ generateInstanceMLSOL <- function (seedInstance, refNeigh, t, D) {
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A list of vectors with the indexes of the neighbors for each instance
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getAllNeighbors(bibtex, c(1:D$measures$num.instances))
-#' }
 getAllNeighbors <- function(D, d, tableVDM=NULL) {
 
-  .mldrApplyFun2(d, function(i) {
+  mldr.resampling.env$.mldrApplyFun2(d, function(i) {
     activeLabels <- D$labels[which(D$dataset[i,D$labels$index] %in% 1),1]
     if (length(activeLabels) > 0) {
       getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, tableVDM)
     }
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -354,16 +305,11 @@ getAllNeighbors <- function(D, d, tableVDM=NULL) {
 #' @param k Number of neighbors to be retrieved
 #'
 #' @return A list of vectors with the indexes of the neighbors for each instance
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getAllNeighbors2(neighbors, c(1:D$measures$num.instances), 3)
-#' }
 getAllNeighbors2 <- function(neighbors, d, k) {
 
-  .mldrApplyFun2(neighbors, function(x) {
+  mldr.resampling.env$.mldrApplyFun2(neighbors, function(x) {
     intersect(x, d)[1:k+1]
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -377,20 +323,15 @@ getAllNeighbors2 <- function(neighbors, d, k) {
 #' @param k Number of neighbors taken into account for each instance
 #'
 #' @return A structure with the proportion of neighbors having an opposite class with respect to an instance and label
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getC(bibtex, rownames(bibtex), neighbors, 3)
-#' }
 getC <- function(D, d, neighbors, k) {
 
-  .mldrApplyFun2(d, function(i) {
-    unlist(.mldrApplyFun1(D$labels$index, function(j) {
-      (1/k) * sum(unlist(.mldrApplyFun1(neighbors[i], function(m) {
+  mldr.resampling.env$.mldrApplyFun2(d, function(i) {
+    unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$index, function(j) {
+      (1/k) * sum(unlist(mldr.resampling.env$.mldrApplyFun1(neighbors[i], function(m) {
         ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
-      }, mc.cores=.numCores)))
-    }, mc.cores=.numCores))
-  }, mc.cores=.numCores)
+      }, mc.cores=mldr.resampling.env$.numCores)))
+    }, mc.cores=mldr.resampling.env$.numCores))
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -404,26 +345,21 @@ getC <- function(D, d, neighbors, k) {
 #' @param minoritary Vector with the minoritary class of each label (normally, 1)
 #'
 #' @return A structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getS(bibtex, rownames(bibtex), C, rep(1, bibtex$measures$num.labels))
-#' }
 getS <- function(D, d, C, minoritary) {
 
-  .mldrApplyFun2(c(1:length(d)), function(i) {
-    unlist(.mldrApplyFun1(D$labels$index, function(j) {
+  mldr.resampling.env$.mldrApplyFun2(c(1:length(d)), function(i) {
+    unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$index, function(j) {
       if ((D$dataset[d[i],j]==minoritary[j - D$measures$num.inputs]) & (C[[i]][j - D$measures$num.inputs]<1)) {
         numerator <- C[[i]][j - D$measures$num.inputs]
-        denominator <- sum(unlist(.mldrApplyFun1(c(1:length(d)), function(x) {
+        denominator <- sum(unlist(mldr.resampling.env$.mldrApplyFun1(c(1:length(d)), function(x) {
           ifelse(D$dataset[d[x],j]==minoritary[j - D$measures$num.inputs],C[[x]][j - D$measures$num.inputs],0)*ifelse(C[[x]][j - D$measures$num.inputs]<1,1,0)
-        }, mc.cores=.numCores)))
+        }, mc.cores=mldr.resampling.env$.numCores)))
         ifelse(denominator!=0,numerator/denominator,-1)
       } else {
         -1
       }
-    }, mc.cores=.numCores))
-  }, mc.cores=.numCores)
+    }, mc.cores=mldr.resampling.env$.numCores))
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -435,16 +371,11 @@ getS <- function(D, d, C, minoritary) {
 #' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
 #'
 #' @return A vector of weights to be considered when oversampling for each instance
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getW(bibtex, S)
-#' }
 getW <- function(D, S) {
 
-  .mldrApplyFun2(c(1:length(S)), function(i) {
+  mldr.resampling.env$.mldrApplyFun2(c(1:length(S)), function(i) {
     sum(S[[i]][!S[[i]] %in% -1])
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -457,16 +388,11 @@ getW <- function(D, S) {
 #' @param k Number of neighbors to be considered
 #'
 #' @return A list of vectors with the indexes of the reverse nearest neighbors of every instance in the dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getAllReverseNeighbors(rownames(bibtex), neighbors, 3)
-#' }
 getAllReverseNeighbors <- function(d, neighbors, k) {
 
-  .mldrApplyFun2(d, function(i) {
+  mldr.resampling.env$.mldrApplyFun2(d, function(i) {
     ceiling(which(unlist(neighbors)==i)/k)
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -480,28 +406,23 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 #' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
 #'
 #' @return A list of values of influence for each instance with respect to its reverse neighbors
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getU(bibtex, rownames(bibtex), rNeighbors, S)
-#' }
 getU <- function(D, d, rNeighbors, S) {
 
-  .mldrApplyFun2(c(1:length(d)), function(i) {
+  mldr.resampling.env$.mldrApplyFun2(c(1:length(d)), function(i) {
 
-    sum(unlist(.mldrApplyFun1(D$labels$index, function(j) {
+    sum(unlist(mldr.resampling.env$.mldrApplyFun1(D$labels$index, function(j) {
 
         ifelse(length(rNeighbors[[i]]) > 0,
 
-        sum(unlist(.mldrApplyFun1(rNeighbors[[i]], function(m) {
+        sum(unlist(mldr.resampling.env$.mldrApplyFun1(rNeighbors[[i]], function(m) {
 
           ifelse(S[[m]][j - D$measures$num.inputs]==-1,0,ifelse(D$dataset[i,j]==D$dataset[m,j],1,-1)*S[[m]][j - D$measures$num.inputs])
 
-        }, mc.cores=.numCores))) / length(rNeighbors[i]), 0)
+        }, mc.cores=mldr.resampling.env$.numCores))) / length(rNeighbors[i]), 0)
 
-    }, mc.cores=.numCores)))
+    }, mc.cores=mldr.resampling.env$.numCores)))
 
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -513,22 +434,17 @@ getU <- function(D, d, rNeighbors, S) {
 #' @param u List of influences in reverse neighbors for each instance
 #'
 #' @return A list with the values of importance of each instance in the dataset
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' getV(rownames(bibtex), w, u)
-#' }
 getV <- function(w, u) {
 
-  v <- .mldrApplyFun2(c(1:length(w)), function(i) {
+  v <- mldr.resampling.env$.mldrApplyFun2(c(1:length(w)), function(i) {
          w[[i]] + u[[i]]
-       }, mc.cores=.numCores)
+       }, mc.cores=mldr.resampling.env$.numCores)
 
   minimum <- min(unlist(v))
 
-  .mldrApplyFun1(v, function(x) {
+  mldr.resampling.env$.mldrApplyFun1(v, function(x) {
     x - minimum
-  }, mc.cores=.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores)
 
 }
 
@@ -547,53 +463,47 @@ getV <- function(w, u) {
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return Time (in seconds) taken to execute the algorithm (NULL if no algorithm was executed)
-#'
-#' @examples
-#' \dontrun{
-#' library(mldr)
-#' executeAlgorithm(bibtex, "MLSMOTE", k=3)
-#' }
 executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbors2, tableVDM) {
 
   if (!(a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS", "MLRkNNOS", "MLSMOTE", "MLSOL", "MLUL", "MLeNN", "MLTL", "REMEDIAL"))) {
-    print(paste("Error: There is no algorithm named", a))
+    message(paste("Error: There is no algorithm named", a))
     NULL
   } else {
 
     f <- get(a)
     if (a %in% c("LPROS", "LPRUS", "MLROS", "MLRUS")) {
       name <- paste(D$name, a, "P", P, sep = "_")
-      print(paste("Running",a,"on",D$name,"with P =",P))
+      message(paste("Running",a,"on",D$name,"with P =",P))
       startTime <- Sys.time()
       d <- f(D, P)
       endTime <- Sys.time()
     } else if (a %in% c("MLRkNNOS", "MLSMOTE")) {
       name <- paste(D$name, a, "k", k, sep = "_")
-      print(paste("Running",a,"on",D$name,"with k =",k))
+      message(paste("Running",a,"on",D$name,"with k =",k))
       startTime <- Sys.time()
       d <- f(D, k, tableVDM)
       endTime <- Sys.time()
     } else if (a %in% c("MLSOL", "MLUL")) {
       name <- paste(D$name, a, "P", P, "k", k, sep = "_")
-      print(paste("Running",a,"on",D$name,"with P =",P,"and k =",k))
+      message(paste("Running",a,"on",D$name,"with P =",P,"and k =",k))
       startTime <- Sys.time()
       d <- f(D, P, k, neighbors, tableVDM)
       endTime <- Sys.time()
     } else if (a == "MLeNN") {
       name <- paste(D$name, a, "TH", TH, "k", k, sep = "_")
-      print(paste("Running",a,"on",D$name,"with TH =",TH,"and k =",k))
+      message(paste("Running",a,"on",D$name,"with TH =",TH,"and k =",k))
       startTime <- Sys.time()
       d <- f(D, TH, k, neighbors2, tableVDM)
       endTime <- Sys.time()
     } else if (a == "MLTL") {
       name <- paste(D$name, a, "TH", TH, sep = "_")
-      print(paste("Running",a,"on",D$name,"with TH =",TH))
+      message(paste("Running",a,"on",D$name,"with TH =",TH))
       startTime <- Sys.time()
       d <- f(D, TH, neighbors2, tableVDM)
       endTime <- Sys.time()
     } else { #REMEDIAL
       name <- a
-      print(paste("Running",a,"on",D$name))
+      message(paste("Running",a,"on",D$name))
       startTime <- Sys.time()
       d <- f(D)
       endTime <- Sys.time()
@@ -601,7 +511,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
 
     time <- as.numeric(endTime - startTime, units="secs")
 
-    print(paste("Time taken (in seconds):",time))
+    message(paste("Time taken (in seconds):",time))
 
     mldr::write_arff(d, paste(outputDirectory, name, sep="/"))
 
@@ -626,21 +536,19 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
 #' @return Dataframe with times (in seconds) taken in to execute each algorithm
 #'
 #' @examples
-#' \dontrun{
 #' library(mldr)
-#' resample(bibtex, "MLSMOTE", k=3)
-#' resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
-#' resample(bibtex, params)
-#' }
+#' library(mldr.resampling)
+#' resample(birds, "LPROS", P=25)
+#' resample(birds, c("LPROS", "LPRUS"), P=30, outputDirectory=)
 #' @export
-resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=getwd()) {
+resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=tempdir()) {
 
   times <- data.frame(matrix(nrow = 0, ncol = 2))
   colnames(times) <- c("algorithm", "time")
 
   if (missing(D)) {
 
-    print("Please, provide a mld object as the original dataset")
+    message("Please, provide a mld object as the original dataset")
     NULL
 
   } else {
@@ -649,7 +557,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 
       if (missing(params)) {
 
-        print("Please, specify the dataset and algorithms to be applied, either with the parameter algorithms or with params")
+        message("Please, specify the dataset and algorithms to be applied, either with the parameter algorithms or with params")
         NULL
 
       } else {
@@ -660,29 +568,29 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
         neighbors2 <- NULL
         timeNeighbors <- 0
 
-        print(paste("Calculating structures for dataset", D$name, ", if necessary. Once this is done, algorithms will be applied faster"))
+        message(paste("Calculating structures for dataset", D$name, ", if necessary. Once this is done, algorithms will be applied faster"))
 
         if (length(intersect(algorithms, c("MLSMOTE","MLeNN","MLTL","MLSOL","MLUL"))) > 0) {
 
-          print(paste("Calculating VDM table for dataset", D$name))
+          message(paste("Calculating VDM table for dataset", D$name))
           startTime <- Sys.time()
           tableVDM <- calculateTableVDM(D)
           endTime <- Sys.time()
           timeTableVDM <- as.numeric(endTime - startTime, units="secs")
-          print(paste("Time taken (in seconds):",timeTableVDM))
+          message(paste("Time taken (in seconds):",timeTableVDM))
 
         }
 
         if (length(intersect(algorithms, c("MLeNN", "MLTL","MLSOL","MLUL"))) > 0) {
 
-          print(paste("Calculating neighbors structure for dataset", D$name))
+          message(paste("Calculating neighbors structure for dataset", D$name))
           startTime <- Sys.time()
           neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], tableVDM)
-          neighbors2 <- getAllNeighbors2(neighbors, unique(unlist(.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=.numCores))), max(params[params[,1] %in% c("MLeNN","MLTL"),3]))
-          neighbors <- .mldrApplyFun1(neighbors, function(x) { x[1:(max(params[params[,1] %in% c("MLSOL","MLUL"),3])+1)] }, mc.cores=.numCores)
+          neighbors2 <- getAllNeighbors2(neighbors, unique(unlist(mldr.resampling.env$.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=mldr.resampling.env$.numCores))), max(params[params[,1] %in% c("MLeNN","MLTL"),3]))
+          neighbors <- mldr.resampling.env$.mldrApplyFun1(neighbors, function(x) { x[1:(max(params[params[,1] %in% c("MLSOL","MLUL"),3])+1)] }, mc.cores=mldr.resampling.env$.numCores)
           endTime <- Sys.time()
           timeNeighbors <- as.numeric(endTime - startTime, units="secs")
-          print(paste("Time taken (in seconds):",timeNeighbors))
+          message(paste("Time taken (in seconds):",timeNeighbors))
 
         }
 
@@ -700,7 +608,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
         for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL","MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors }
         for (i in rownames(times[times$algorithm %in% c("MLSMOTE","MLSOL","MLUL","MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeTableVDM }
 
-        print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
+        message(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 
         times
 
@@ -714,29 +622,29 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
       neighbors2 <- NULL
       timeNeighbors <- 0
 
-      print(paste("Calculating structures for dataset", D$name, ", if necessary. Once this is done, algorithms will be applied faster"))
+      message(paste("Calculating structures for dataset", D$name, ", if necessary. Once this is done, algorithms will be applied faster"))
 
       if (length(intersect(algorithms, c("MLSMOTE","MLeNN","MLTL","MLSOL","MLUL"))) > 0) {
 
-        print(paste("Calculating VDM table for dataset", D$name))
+        message(paste("Calculating VDM table for dataset", D$name))
         startTime <- Sys.time()
         tableVDM <- calculateTableVDM(D)
         endTime <- Sys.time()
         timeTableVDM <- as.numeric(endTime - startTime, units="secs")
-        print(paste("Time taken (in seconds):",timeTableVDM))
+        message(paste("Time taken (in seconds):",timeTableVDM))
 
       }
 
       if (length(intersect(algorithms, c("MLeNN", "MLTL","MLSOL","MLUL"))) > 0) {
 
-        print(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, algorithms will be applied faster"))
+        message(paste("Calculating neighbors structure for dataset", D$name, ". Once this is done, algorithms will be applied faster"))
         startTime <- Sys.time()
         neighbors <- getAllNeighbors(D, c(1:D$measures$num.instances)[D$dataset$.labelcount > 0], tableVDM)
-        neighbors2 <- getAllNeighbors2(neighbors, unique(unlist(.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=.numCores))), k)
-        neighbors <- .mldrApplyFun1(neighbors, function(x) { x[1:k+1] }, mc.cores=.numCores)
+        neighbors2 <- getAllNeighbors2(neighbors, unique(unlist(mldr.resampling.env$.mldrApplyFun1(D$labels[D$labels$IRLbl < D$measures$meanIR,]$index, function(x) { c(1:D$measures$num.instances)[D$dataset[x]==1] }, mc.cores=mldr.resampling.env$.numCores))), k)
+        neighbors <- mldr.resampling.env$.mldrApplyFun1(neighbors, function(x) { x[1:k+1] }, mc.cores=mldr.resampling.env$.numCores)
         endTime <- Sys.time()
         timeNeighbors <- as.numeric(endTime - startTime, units="secs")
-        print(paste("Time taken (in seconds):",timeNeighbors))
+        message(paste("Time taken (in seconds):",timeNeighbors))
 
       }
 
@@ -754,7 +662,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
       for (i in rownames(times[times$algorithm %in% c("MLSOL","MLUL","MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeNeighbors }
       for (i in rownames(times[times$algorithm %in% c("MLSMOTE","MLSOL","MLUL","MLeNN","MLTL"),])) { times[i,2] <- as.numeric(times[i,2]) + timeTableVDM }
 
-      print(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
+      message(paste("End of execution. Generated MLDs stored under directory",outputDirectory))
 
       times
 
@@ -770,13 +678,15 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=g
 #'
 #' @param n The new value for the number of cores
 #'
+#' @return No return value, called in order to change the number of cores
+#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' setNumCores(8)
 #' }
 #' @export
 setNumCores <- function(n) {
-    .numCores <<- n
+  assign('mldr.resampling.env$.numCores', n, mldr.resampling.env)
 }
 
 
@@ -786,12 +696,11 @@ setNumCores <- function(n) {
 #' @return The number of cores available for parallel computing
 #'
 #' @examples
-#' \dontrun{
 #' getNumCores()
-#' }
+#'
 #' @export
 getNumCores <- function() {
-  .numCores
+  mldr.resampling.env$.numCores
 }
 
 
@@ -800,22 +709,23 @@ getNumCores <- function() {
 #'
 #' @param beParallel A boolean indicating if parallel computing is to be enabled (TRUE) or disabled (FALSE)
 #'
+#' @return No return value, called in order to enable parallel computing
+#'
 #' @examples
-#' \dontrun{
 #' setParallel(TRUE)
-#' }
+#'
 #' @export
 setParallel <- function(beParallel) {
   if (!beParallel) {
-    .mldrApplyFun2 <<- function(x, l, mc.cores) { pbapply::pblapply(x,l) }
-    print("Parallel computing disabled")
+    assign('mldr.resampling.env$.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
+    message("Parallel computing disabled")
   } else {
     if (requireNamespace("parallel", quietly = TRUE)) {
       setNumCores(parallel::detectCores())
-      .mldrApplyFun2 <<- parallel::mclapply
-      print(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
+      assign('mldr.resampling.env$.mldrApplyFun2', parallel::mclapply, mldr.resampling.env)
+      message(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
     } else {
-      print("You have to install package parallel in order to enable parallel computing")
+      message("You have to install package parallel in order to enable parallel computing")
     }
   }
 }
