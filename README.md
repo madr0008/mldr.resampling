@@ -1,5 +1,4 @@
 # mldr.resampling
-====
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/mldr.resampling)](https://CRAN.R-project.org/package=mldr.resampling)
 [![Downloads](http://cranlogs.r-pkg.org/badges/mldr.resampling)](https://cran.r-project.org/package=mldr.resampling)
