@@ -37,9 +37,7 @@ This package has an interface function that can be called in order to execute th
 ```R
 library(mldr.resampling)
 
-# Data sets birds, emotions and genbase are
-# provided within the package mldr
-resample(bibtex, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
+resample(birds, c("MLSOL", "MLeNN"), P=30, k=5, TH=0.4)
 ```
 
 For more examples and detailed explanation on available functions, please refer to the documentation.
