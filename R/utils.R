@@ -686,7 +686,7 @@ resample <- function(D, algorithms, P=25, k=3, TH=0.5, params, outputDirectory=t
 #' }
 #' @export
 setNumCores <- function(n) {
-  assign('mldr.resampling.env$.numCores', n, mldr.resampling.env)
+  assign('.numCores', n, mldr.resampling.env)
 }
 
 
@@ -717,12 +717,12 @@ getNumCores <- function() {
 #' @export
 setParallel <- function(beParallel) {
   if (!beParallel) {
-    assign('mldr.resampling.env$.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
+    assign('.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
     message("Parallel computing disabled")
   } else {
     if (requireNamespace("parallel", quietly = TRUE)) {
       setNumCores(parallel::detectCores())
-      assign('mldr.resampling.env$.mldrApplyFun2', parallel::mclapply, mldr.resampling.env)
+      assign('.mldrApplyFun2', parallel::mclapply, mldr.resampling.env)
       message(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
     } else {
       message("You have to install package parallel in order to enable parallel computing")
