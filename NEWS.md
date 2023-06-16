@@ -6,3 +6,8 @@
 # mldr.resampling 0.2.1
 
 * Fixed a bug so that parallel computing works
+
+
+# mldr.resampling 0.2.2
+
+* Added Antonio Jesús Rivera Rivas as an author
