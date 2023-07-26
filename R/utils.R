@@ -502,7 +502,7 @@ executeAlgorithm <- function(D, a, P, k, TH, outputDirectory, neighbors, neighbo
       d <- f(D, TH, neighbors2, tableVDM)
       endTime <- Sys.time()
     } else { #REMEDIAL
-      name <- a
+      name <- paste(D$name, a, sep = "_")
       message(paste("Running",a,"on",D$name))
       startTime <- Sys.time()
       d <- f(D)
