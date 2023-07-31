@@ -21,7 +21,7 @@ MLSMOTE <- function(D, k, tableVDM=NULL) {
                                     refNeigh <- sample(neighbors, size=1)
                                     newSample(y, refNeigh, neighbors, D)
                                   }, mc.cores=mldr.resampling.env$.numCores)
-                                }, mc.cores=mldr.resampling.env$.numCores), recursive = FALSE)
+                                }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "k", "tableVDM"), parEnv=environment()), recursive = FALSE)
 
   mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldr.resampling.env$.mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=mldr.resampling.env$.numCores)), D$labels$index, D$attributes, D$name)
 

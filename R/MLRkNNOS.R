@@ -60,7 +60,7 @@ MLRkNNOS <- function(D, k, tableVDM=NULL) {
     aux[factors] <- mldr.resampling.env$.mldrApplyFun1(factors, function(i) { factor(aux[[i]], levels=unique(D$dataset[[i]])) }, mc.cores=mldr.resampling.env$.numCores)
     aux
 
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "k", "tableVDM", "minoritary", "numeric", "factors"), parEnv=environment())
 
   message("Part 2/3: Training SVMs")
 
@@ -76,7 +76,7 @@ MLRkNNOS <- function(D, k, tableVDM=NULL) {
 
     e1071::svm(Class ~ ., data = O)
 
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "factors", "S"), parEnv=environment())
 
   message("Part 3/3: Predicting labels")
 

@@ -35,7 +35,7 @@ MLUL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
   S <- getS(D, d, C, minoritary)
 
-  w <- getW(D, S)
+  w <- getW(S)
 
   u <- getU(D, d, rNeighbors, S)
 

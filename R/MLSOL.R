@@ -33,7 +33,7 @@ MLSOL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
   S <- getS(D, d, C, minoritary)
 
-  w <- getW(D, S)
+  w <- getW(S)
 
   t <- initTypes(C, neighbors, k, minoritary, D, d)
 
@@ -45,7 +45,7 @@ MLSOL <- function(D, P, k, neighbors=NULL, tableVDM=NULL) {
 
   newSamples <- mldr.resampling.env$.mldrApplyFun2(seedInstances, function(i) {
     generateInstanceMLSOL(i, sample(neighbors[[i]], size=1), t, D)
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("neighbors", "t", "D"), parEnv=environment())
 
   mldr::mldr_from_dataframe(rbind(D$dataset[1:D$measures$num.attributes], mldr.resampling.env$.mldrApplyFun1(stats::setNames(as.data.frame(do.call(rbind, newSamples[-1])), names(D$attributes)), unlist, mc.cores=mldr.resampling.env$.numCores)), D$labels$index, D$attributes, D$name)
 

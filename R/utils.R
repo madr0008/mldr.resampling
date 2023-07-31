@@ -92,7 +92,7 @@ calculateTableVDM <- function(D) {
 
     }, mc.cores=mldr.resampling.env$.numCores)
 
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D"), parEnv=environment())
 
   df
 
@@ -183,7 +183,7 @@ initTypes <- function(C, neighbors, k, minoritary, D, d) {
         }
       }
     }, mc.cores=mldr.resampling.env$.numCores))
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "minoritary", "C"), parEnv=environment())
 
   change <- TRUE
   while (change) {
@@ -292,7 +292,7 @@ getAllNeighbors <- function(D, d, tableVDM=NULL) {
     if (length(activeLabels) > 0) {
       getNN(i, d, ifelse(length(activeLabels)==1,activeLabels,sample(activeLabels,1)), D, tableVDM)
     }
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "tableVDM"), parEnv=environment())
 
 }
 
@@ -309,7 +309,7 @@ getAllNeighbors2 <- function(neighbors, d, k) {
 
   mldr.resampling.env$.mldrApplyFun2(neighbors, function(x) {
     intersect(x, d)[1:k+1]
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("d", "k"), parEnv=environment())
 
 }
 
@@ -331,7 +331,7 @@ getC <- function(D, d, neighbors, k) {
         ifelse(D$dataset[i,j]==D$dataset[m,j],0,1)
       }, mc.cores=mldr.resampling.env$.numCores)))
     }, mc.cores=mldr.resampling.env$.numCores))
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "neighbors", "k"), parEnv=environment())
 
 }
 
@@ -359,7 +359,7 @@ getS <- function(D, d, C, minoritary) {
         -1
       }
     }, mc.cores=mldr.resampling.env$.numCores))
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "C", "minoritary"), parEnv=environment())
 
 }
 
@@ -367,15 +367,14 @@ getS <- function(D, d, C, minoritary) {
 
 #' Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label
 #'
-#' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param S Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance
 #'
 #' @return A vector of weights to be considered when oversampling for each instance
-getW <- function(D, S) {
+getW <- function(S) {
 
   mldr.resampling.env$.mldrApplyFun2(c(1:length(S)), function(i) {
     sum(S[[i]][!S[[i]] %in% -1])
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("S"), parEnv=environment())
 
 }
 
@@ -392,7 +391,7 @@ getAllReverseNeighbors <- function(d, neighbors, k) {
 
   mldr.resampling.env$.mldrApplyFun2(d, function(i) {
     ceiling(which(unlist(neighbors)==i)/k)
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("neighbors", "k"), parEnv=environment())
 
 }
 
@@ -422,7 +421,7 @@ getU <- function(D, d, rNeighbors, S) {
 
     }, mc.cores=mldr.resampling.env$.numCores)))
 
-  }, mc.cores=mldr.resampling.env$.numCores)
+  }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "rNeighbors", "S"), parEnv=environment())
 
 }
 
@@ -438,7 +437,7 @@ getV <- function(w, u) {
 
   v <- mldr.resampling.env$.mldrApplyFun2(c(1:length(w)), function(i) {
          w[[i]] + u[[i]]
-       }, mc.cores=mldr.resampling.env$.numCores)
+       }, mc.cores=mldr.resampling.env$.numCores, parL=c("w", "u"), parEnv=environment())
 
   minimum <- min(unlist(v))
 
@@ -720,12 +719,32 @@ setParallel <- function(beParallel) {
     assign('.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
     message("Parallel computing disabled")
   } else {
-    if (requireNamespace("parallel", quietly = TRUE)) {
-      setNumCores(parallel::detectCores())
-      assign('.mldrApplyFun2', parallel::mclapply, mldr.resampling.env)
-      message(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
+    if(.Platform$OS.type == "windows") {
+      if (requireNamespace("parallel", quietly = TRUE) & requireNamespace("doParallel", quietly = TRUE)) {
+        setNumCores(parallel::detectCores())
+        windowsParallel <- function(parV, parF, mc.cores, parL, parEnv) {
+          cl <- makeCluster(mc.cores)
+          clusterExport(cl, varlist=parL, envir=parEnv)
+          ret <- parLapply(cl, parV, parF)
+          stopCluster(cl)
+          ret
+        }
+        assign('.mldrApplyFun2', windowsParallel, mldr.resampling.env)
+        message(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
+      } else {
+        message("You have to install packages parallel and doParallel in order to enable parallel computing")
+      }
     } else {
-      message("You have to install package parallel in order to enable parallel computing")
+      if (requireNamespace("parallel", quietly = TRUE)) {
+        setNumCores(parallel::detectCores())
+        unixParallel <- function(parV, parF, mc.cores, parL, parEnv) {
+          parallel::mclapply(parV, parF, mc.cores=mc.cores)
+        }
+        assign('.mldrApplyFun2', unixParallel, mldr.resampling.env)
+        message(paste("Parallel computing enabled on all",getNumCores(),"available cores. Use function setNumCores if you wish to modify it"))
+      } else {
+        message("You have to install package parallel in order to enable parallel computing")
+      }
     }
   }
 }

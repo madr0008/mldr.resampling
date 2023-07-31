@@ -27,7 +27,7 @@ MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL, tableVDM=NULL) {
                                                  adjustedHammingDist(x,y,D) > TH
                                                }, mc.cores=mldr.resampling.env$.numCores)))
                   if (numDifferences >= k/2) { x } #Samples to delete
-                }, mc.cores=mldr.resampling.env$.numCores))
+                }, mc.cores=mldr.resampling.env$.numCores, parL=c("D", "tableVDM", "k", "neighbors", "TH"), parEnv=environment()))
                 ,
                 unlist(mldr.resampling.env$.mldrApplyFun2(c(1:length(majBag)), function(x) {
                   n <- neighbors[[x]][1:k]
@@ -35,7 +35,7 @@ MLeNN <- function(D, TH=0.5, k=3, neighbors=NULL, tableVDM=NULL) {
                     adjustedHammingDist(majBag[[x]],y,D) > TH
                   }, mc.cores=mldr.resampling.env$.numCores)))
                   if (numDifferences >= k/2) { x } #Samples to delete
-                }, mc.cores=mldr.resampling.env$.numCores))
+                }, mc.cores=mldr.resampling.env$.numCores, parL=c("neighbors", "majBag", "D", "TH", "k"), parEnv=environment()))
 
               )
 
