@@ -4,7 +4,7 @@
 \alias{newSample}
 \title{Auxiliary function used by MLSMOTE. Creates a synthetic sample based on values of attributes and labels of its neighbors}
 \usage{
-newSample(seedInstance, refNeigh, neighbors, D)
+newSample(seedInstance, refNeigh, neighbors, strategy, D)
 }
 \arguments{
 \item{seedInstance}{Sample we are using as "template"}
@@ -12,6 +12,8 @@ newSample(seedInstance, refNeigh, neighbors, D)
 \item{refNeigh}{Reference neighbor}
 
 \item{neighbors}{Neighbors to take into account}
+
+\item{strategy}{Strategy for choosing the synthetic labels: union, intersection or ranking}
 
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 }

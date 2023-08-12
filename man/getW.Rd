@@ -4,11 +4,9 @@
 \alias{getW}
 \title{Auxiliary function used by MLSOL and MLUL. For non outlier instances, it aggregates the values of S for each label}
 \usage{
-getW(D, S)
+getW(S)
 }
 \arguments{
-\item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
-
 \item{S}{Structure with the proportion of neighbors having an opposite class with respect to an instance and label, normalized by the global class imbalance}
 }
 \value{

@@ -10,7 +10,7 @@ mldr.resampling.env <- new.env(parent=emptyenv())
 
   assign('.numCores', 1, mldr.resampling.env)
   assign('.mldrApplyFun1', function(x, l, mc.cores) { lapply(x,l) }, mldr.resampling.env)
-  assign('.mldrApplyFun2', function(x, l, mc.cores) { pbapply::pblapply(x,l) }, mldr.resampling.env)
+  assign('.mldrApplyFun2', function(parV, parF, mc.cores, parL, parEnv) { pbapply::pblapply(parV, parF) }, mldr.resampling.env)
 
 }
 

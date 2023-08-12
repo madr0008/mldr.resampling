@@ -10,6 +10,7 @@ executeAlgorithm(
   P,
   k,
   TH,
+  strategy,
   outputDirectory,
   neighbors,
   neighbors2,
@@ -26,6 +27,8 @@ executeAlgorithm(
 \item{k}{Number of neighbors taken into account for each instance (if required by the algorithm)}
 
 \item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)}
+
+\item{strategy}{Strategy for choosing the synthetic labels (if required by the algorithm)}
 
 \item{outputDirectory}{Route with the directory where the generated ARFF file will be stored}
 

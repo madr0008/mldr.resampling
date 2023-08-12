@@ -7,12 +7,14 @@
 Charte, F., Rivera, A. J., del Jesus, M. J., & Herrera, F. (2015). MLSMOTE: Approaching imbalanced multilabel learning through synthetic instance generation. Knowledge-Based Systems, 89, 385-397.
 }
 \usage{
-MLSMOTE(D, k, tableVDM = NULL)
+MLSMOTE(D, k, strategy, tableVDM = NULL)
 }
 \arguments{
 \item{D}{mld \code{mldr} object with the multilabel dataset to preprocess}
 
 \item{k}{Number of neighbors to be considered when creating a synthetic instance}
+
+\item{strategy}{Strategy for choosing the synthetic labels: union, intersection or ranking}
 
 \item{tableVDM}{Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower}
 }
