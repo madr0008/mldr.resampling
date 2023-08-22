@@ -28,7 +28,7 @@ executeAlgorithm(
 
 \item{TH}{Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)}
 
-\item{strategy}{Strategy for choosing the synthetic labels (if required by the algorithm)}
+\item{strategy}{Strategy for choosing the synthetic labels (if required by the algorithm). Possible values: "union", "intersection" and "ranking" (default)}
 
 \item{outputDirectory}{Route with the directory where the generated ARFF file will be stored}
 
