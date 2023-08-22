@@ -464,7 +464,7 @@ getV <- function(w, u) {
 #' @param P Percentage in which the original dataset is increased/decreased (if required by the algorithm)
 #' @param k Number of neighbors taken into account for each instance (if required by the algorithm)
 #' @param TH Threshold for the Hamming Distance in order to consider an instance different to another one (if required by the algorithm)
-#' @param strategy Strategy for choosing the synthetic labels (if required by the algorithm)
+#' @param strategy Strategy for choosing the synthetic labels (if required by the algorithm). Possible values: "union", "intersection" and "ranking" (default)
 #' @param outputDirectory Route with the directory where the generated ARFF file will be stored
 #' @param neighbors Structure with all instances and neighbors in the dataset, useful in MLSOL and MLUL
 #' @param neighbors2 Structure with some instances and neighbors in the dataset, useful in MLeNN and MLTL

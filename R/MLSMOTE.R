@@ -7,13 +7,13 @@
 #'
 #' @param D mld \code{mldr} object with the multilabel dataset to preprocess
 #' @param k Number of neighbors to be considered when creating a synthetic instance
-#' @param strategy Strategy for choosing the synthetic labels: union, intersection or ranking
+#' @param strategy Strategy for choosing the synthetic labels. Possible values: "union", "intersection" and "ranking" (default)
 #' @param tableVDM Dataframe object containing previous calculations for faster processing. If it is empty, the algorithm will be slower
 #'
 #' @return A mld object containing the preprocessed multilabel dataset
 #'
 #' @export
-MLSMOTE <- function(D, k, strategy, tableVDM=NULL) {
+MLSMOTE <- function(D, k, strategy="ranking", tableVDM=NULL) {
 
   newSamples <- unlist(mldr.resampling.env$.mldrApplyFun2(D$labels[D$labels$IRLbl > D$measures$meanIR,]$index, function(x) {
                                   minBag <- c(1:D$measures$num.instances)[D$dataset[x]==1]
